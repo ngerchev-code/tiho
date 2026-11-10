@@ -3,7 +3,7 @@
     <string name="app_name">Тихо</string>
 
     <string name="empty_title">Натиснете микрофона и говорете</string>
-    <string name="empty_subtitle">Думите ви се появяват като текст. Не се записва звук.</string>
+    <string name="empty_subtitle">Думите ви се появяват като текст. Изпратете ги на когото искате през Viber, WhatsApp или имейл. Не се записва звук.</string>
     <string name="status_ready">Готово</string>
     <string name="status_starting">Стартиране…</string>
     <string name="status_listening">Слушам</string>
@@ -17,17 +17,13 @@
     <string name="cd_stop">Спри диктовката</string>
     <string name="cd_clear_draft">Изчисти черновата</string>
     <string name="cd_send">Изпрати</string>
-    <string name="cd_copy">Копирай съобщението</string>
-    <string name="cd_share_chatgpt">Сподели в ChatGPT</string>
-    <string name="cd_delete">Изтрий съобщението</string>
     <string name="cd_menu">Меню</string>
     <string name="cd_back">Назад</string>
     <string name="cd_dismiss">Затвори</string>
-    <string name="cd_switch_language">Смени езика за разпознаване</string>
 
     <string name="menu_copy_all">Копирай разговора</string>
     <string name="menu_chatgpt_all">Сподели разговора в ChatGPT</string>
-    <string name="menu_share_all">Сподели чрез…</string>
+    <string name="menu_share_all">Изпрати разговора до…</string>
     <string name="menu_clear">Изчисти разговора</string>
     <string name="menu_language">Език</string>
     <string name="menu_settings">Поверителност и настройки</string>
@@ -41,7 +37,6 @@
 
     <string name="msg_copied">Копирано</string>
     <string name="msg_chatgpt_web">Приложението ChatGPT не е намерено. Отворено е в браузъра; текстът е и копиран.</string>
-    <string name="msg_chatgpt_failed">ChatGPT не можа да се отвори. Текстът е копиран, поставете го там.</string>
     <string name="msg_nothing_to_share">Още няма съобщения</string>
 
     <string name="notice_no_permission">За диктовка е нужен достъп до микрофона. Разрешете го в настройките на приложението.</string>
@@ -63,14 +58,58 @@
     <string name="settings_title">Поверителност и настройки</string>
     <string name="set_on_device_title">Предпочитай разпознаване на устройството</string>
     <string name="set_on_device_text">Речта се обработва на телефона, когато езиковият пакет е инсталиран. Иначе се използва онлайн услугата за реч.</string>
-    <string name="set_keep_title">Пази съобщенията 24 часа</string>
-    <string name="set_keep_text">Включено: текстът се пази само на този телефон и се изтрива автоматично след 24 часа. Изключено: съобщенията са само в паметта и изчезват при затваряне на приложението.</string>
     <string name="set_punct_title">Изговорена пунктуация</string>
     <string name="set_punct_text">Кажете „запетая“, „точка“, „въпросителен знак“ или „нов ред“, за да ги вмъкнете.</string>
     <string name="privacy_heading">Как се обработват данните ви</string>
-    <string name="privacy_body">• Звукът никога не се записва във файл. Потокът от микрофона отива директно към услугата за разпознаване на реч на телефона и обратно се връща само текстът.\n\n• Приложението няма разрешение за интернет, няма акаунт, реклами и аналитика.\n\n• Съобщенията остават само на този телефон и се изтриват автоматично след 24 часа или веднага, когато изчистите разговора.\n\n• Разпознаването се извършва от услугата за реч, инсталирана на телефона (обикновено Google). При разпознаване на устройството звукът не напуска телефона. При онлайн услугата звукът се изпраща към този доставчик за транскрипция според неговата политика за поверителност.\n\n• Когато споделите текст в ChatGPT или друго приложение, текстът се предава на избраното от вас приложение.</string>
+    <string name="privacy_body">• Звукът никога не се записва във файл. Потокът от микрофона отива директно към услугата за разпознаване на реч на телефона и обратно се връща само текстът.\n\n• Приложението няма разрешение за интернет, няма акаунт, реклами и аналитика.\n\n• Съобщенията и прикачените файлове остават само на този телефон, в личното хранилище на приложението, и се изтриват автоматично след избрания от вас срок или веднага, когато изчистите разговора. Прикачените файлове са копия; оригиналите ви не се пипат.\n\n• Разпознаването се извършва от услугата за реч, инсталирана на телефона (обикновено Google). При разпознаване на устройството звукът не напуска телефона. При онлайн услугата звукът се изпраща към този доставчик за транскрипция според неговата политика за поверителност.\n\n• Текст и файлове напускат приложението само когато вие ги изпратите към друго приложение (Viber, WhatsApp, имейл, ChatGPT…). Оттам важат правилата на това приложение.</string>
 
     <string name="about_title">За приложението</string>
     <string name="about_version">Версия %1$s</string>
-    <string name="about_body">„Тихо“ превръща казаното в четими текстови съобщения за моменти, когато пускането или записването на звук не е уместно: срещи, офис, градски транспорт.\n\nГоворете, проверете текста, изпратете. Копирайте го или го подайте към ChatGPT с едно докосване.</string>
+    <string name="about_body">„Тихо“ превръща казаното в четими текстови съобщения за моменти, когато пускането или записването на звук не е уместно: срещи, офис, градски транспорт.\n\nГоворете, проверете текста, прикачете документ или снимка при нужда и го изпратете нататък през Viber, WhatsApp, имейл или ChatGPT.</string>
+
+    <!-- Added in 1.1 -->
+    <string name="msg_nothing_to_copy">Няма текст за копиране</string>
+    <string name="msg_app_missing">Това приложение не е инсталирано. Изберете друго.</string>
+    <string name="msg_send_failed">Не се намери приложение за изпращане.</string>
+    <string name="msg_no_app_open">На телефона няма приложение, което да отвори този файл.</string>
+    <string name="msg_file_unsupported">Неподдържан тип файл. Разрешени са: Word, Excel, PowerPoint, PDF, JPEG и PNG.</string>
+    <string name="msg_file_too_large">Файлът е по-голям от 30 MB.</string>
+    <string name="msg_file_failed">Файлът не можа да бъде прочетен.</string>
+    <string name="msg_action_send">Изпрати до…</string>
+    <string name="msg_action_chatgpt">Към ChatGPT</string>
+    <string name="msg_action_copy">Копирай текста</string>
+    <string name="msg_action_delete">Изтрий</string>
+    <string name="cd_attach">Прикачи файл</string>
+    <string name="cd_remove_attachment">Премахни файла</string>
+    <string name="day_today">Днес</string>
+    <string name="day_yesterday">Вчера</string>
+    <string name="sec_appearance">Изглед</string>
+    <string name="sec_dictation">Диктовка</string>
+    <string name="sec_sending">След натискане на „Изпрати“</string>
+    <string name="sec_privacy">Поверителност</string>
+    <string name="set_theme">Тема</string>
+    <string name="theme_system">Като телефона</string>
+    <string name="theme_light">Светла</string>
+    <string name="theme_dark">Тъмна</string>
+    <string name="set_accent">Цвят</string>
+    <string name="set_text_size">Размер на текста в съобщенията</string>
+    <string name="size_small">Малък</string>
+    <string name="size_normal">Нормален</string>
+    <string name="size_large">Голям</string>
+    <string name="set_auto_send_title">Изпращай всяка фраза автоматично</string>
+    <string name="set_auto_send_text">Всяка разпозната фраза веднага става съобщение, без да натискате „Изпрати“.</string>
+    <string name="set_punct_keys_title">Бутони за пунктуация</string>
+    <string name="set_punct_keys_text">Показва реда с бързи бутони . , ? ! и нов ред.</string>
+    <string name="set_screen_on_title">Екранът да не гасне при диктовка</string>
+    <string name="set_screen_on_text">Телефонът не се заключва, докато микрофонът слуша.</string>
+    <string name="set_haptics_title">Вибрация при натискане</string>
+    <string name="set_haptics_text">Кратка вибрация при натискане на микрофона или „Изпрати“.</string>
+    <string name="set_after_send_text">Тихо няма сървър и акаунти. Съобщението стига до друг човек през приложение, което вече ползвате: Тихо подава текста и файловете, а вие избирате контакта там.</string>
+    <string name="target_none">Остава само в Тихо</string>
+    <string name="target_menu">Питай всеки път с кое приложение</string>
+    <string name="set_retention">Пази съобщенията и файловете</string>
+    <string name="ret_session">Докато приложението е отворено</string>
+    <string name="ret_1h">1 час</string>
+    <string name="ret_24h">24 часа</string>
+    <string name="ret_7d">7 дни</string>
 </resources>

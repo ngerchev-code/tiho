@@ -4,7 +4,7 @@
 
     <!-- Chat screen -->
     <string name="empty_title">Tap the microphone and speak</string>
-    <string name="empty_subtitle">Your words appear as text. No audio is saved.</string>
+    <string name="empty_subtitle">Your words appear as text. Send them to anyone through Viber, WhatsApp or e-mail. No audio is saved.</string>
     <string name="status_ready">Ready</string>
     <string name="status_starting">Starting…</string>
     <string name="status_listening">Listening</string>
@@ -18,17 +18,13 @@
     <string name="cd_stop">Stop dictation</string>
     <string name="cd_clear_draft">Clear draft</string>
     <string name="cd_send">Send</string>
-    <string name="cd_copy">Copy message</string>
-    <string name="cd_share_chatgpt">Share to ChatGPT</string>
-    <string name="cd_delete">Delete message</string>
     <string name="cd_menu">Menu</string>
     <string name="cd_back">Back</string>
     <string name="cd_dismiss">Dismiss</string>
-    <string name="cd_switch_language">Switch recognition language</string>
 
     <string name="menu_copy_all">Copy conversation</string>
     <string name="menu_chatgpt_all">Share conversation to ChatGPT</string>
-    <string name="menu_share_all">Share via…</string>
+    <string name="menu_share_all">Send conversation to…</string>
     <string name="menu_clear">Clear conversation</string>
     <string name="menu_language">Language</string>
     <string name="menu_settings">Privacy &amp; settings</string>
@@ -42,7 +38,6 @@
 
     <string name="msg_copied">Copied</string>
     <string name="msg_chatgpt_web">ChatGPT app not found. Opened in the browser; the text is also copied.</string>
-    <string name="msg_chatgpt_failed">Could not open ChatGPT. The text is copied, paste it there.</string>
     <string name="msg_nothing_to_share">No messages yet</string>
 
     <!-- Speech notices -->
@@ -67,15 +62,59 @@
     <string name="settings_title">Privacy &amp; settings</string>
     <string name="set_on_device_title">Prefer on-device recognition</string>
     <string name="set_on_device_text">Speech is processed on the phone when the language pack is installed. Otherwise the online speech service is used.</string>
-    <string name="set_keep_title">Keep messages for 24 hours</string>
-    <string name="set_keep_text">On: text is stored only on this phone and deleted automatically after 24 hours. Off: messages live only in memory and disappear when the app closes.</string>
     <string name="set_punct_title">Spoken punctuation</string>
     <string name="set_punct_text">Say “comma”, “full stop”, “question mark” or “new line” to insert them.</string>
     <string name="privacy_heading">How your data is handled</string>
-    <string name="privacy_body">• Audio is never saved to a file. The microphone stream goes straight to the speech recognition service of your phone and only the resulting text comes back.\n\n• This app has no internet permission, no account, no ads and no analytics.\n\n• Messages stay only on this phone and are deleted automatically after 24 hours, or immediately when you clear the conversation.\n\n• Recognition is done by the speech service installed on your phone (usually Google). With on-device recognition the audio does not leave the phone. With the online service your audio is sent to that provider for transcription under its own privacy policy.\n\n• When you share text to ChatGPT or another app, the text is handed to the app you chose.</string>
+    <string name="privacy_body">• Audio is never saved to a file. The microphone stream goes straight to the speech recognition service of your phone and only the resulting text comes back.\n\n• This app has no internet permission, no account, no ads and no analytics.\n\n• Messages and attached files stay only on this phone, in the private storage of the app, and are deleted automatically after the period you chose, or immediately when you clear the conversation. Attached files are copies; your originals are not touched.\n\n• Recognition is done by the speech service installed on your phone (usually Google). With on-device recognition the audio does not leave the phone. With the online service your audio is sent to that provider for transcription under its own privacy policy.\n\n• Text and files leave the app only when you send them to another app (Viber, WhatsApp, e-mail, ChatGPT…). From there the rules of that app apply.</string>
 
     <!-- About -->
     <string name="about_title">About</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_body">Tiho turns what you say into readable text messages, for moments when playing or recording audio is not appropriate: meetings, the office, public transport.\n\nSpeak, check the text, send. Copy it or pass it to ChatGPT with one tap.</string>
+    <string name="about_body">Tiho turns what you say into readable text messages, for moments when playing or recording audio is not appropriate: meetings, the office, public transport.\n\nSpeak, check the text, attach a document or photo if needed, and send it on through Viber, WhatsApp, e-mail or ChatGPT.</string>
+
+    <!-- Added in 1.1 -->
+    <string name="msg_nothing_to_copy">No text to copy</string>
+    <string name="msg_app_missing">That app is not installed. Choose another one.</string>
+    <string name="msg_send_failed">Could not open an app for sending.</string>
+    <string name="msg_no_app_open">No app on this phone can open this file.</string>
+    <string name="msg_file_unsupported">Unsupported file type. Allowed: Word, Excel, PowerPoint, PDF, JPEG and PNG.</string>
+    <string name="msg_file_too_large">The file is larger than 30 MB.</string>
+    <string name="msg_file_failed">The file could not be read.</string>
+    <string name="msg_action_send">Send to…</string>
+    <string name="msg_action_chatgpt">To ChatGPT</string>
+    <string name="msg_action_copy">Copy text</string>
+    <string name="msg_action_delete">Delete</string>
+    <string name="cd_attach">Attach a file</string>
+    <string name="cd_remove_attachment">Remove file</string>
+    <string name="day_today">Today</string>
+    <string name="day_yesterday">Yesterday</string>
+    <string name="sec_appearance">Appearance</string>
+    <string name="sec_dictation">Dictation</string>
+    <string name="sec_sending">After pressing Send</string>
+    <string name="sec_privacy">Privacy</string>
+    <string name="set_theme">Theme</string>
+    <string name="theme_system">As the phone</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="set_accent">Colour</string>
+    <string name="set_text_size">Message text size</string>
+    <string name="size_small">Small</string>
+    <string name="size_normal">Normal</string>
+    <string name="size_large">Large</string>
+    <string name="set_auto_send_title">Send each phrase automatically</string>
+    <string name="set_auto_send_text">Every recognized phrase becomes a message at once, without pressing Send.</string>
+    <string name="set_punct_keys_title">Punctuation keys</string>
+    <string name="set_punct_keys_text">Show the row of quick keys . , ? ! and new line.</string>
+    <string name="set_screen_on_title">Keep the screen on while dictating</string>
+    <string name="set_screen_on_text">The phone does not lock while the microphone is listening.</string>
+    <string name="set_haptics_title">Vibration feedback</string>
+    <string name="set_haptics_text">A short vibration when you press the microphone or Send.</string>
+    <string name="set_after_send_text">Tiho has no server and no accounts. A message reaches another person through an app you already use: Tiho hands over the text and files, and you pick the contact there.</string>
+    <string name="target_none">Only keep it in Tiho</string>
+    <string name="target_menu">Ask every time which app</string>
+    <string name="set_retention">Keep messages and files for</string>
+    <string name="ret_session">Until the app closes</string>
+    <string name="ret_1h">1 hour</string>
+    <string name="ret_24h">24 hours</string>
+    <string name="ret_7d">7 days</string>
 </resources>

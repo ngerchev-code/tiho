@@ -10,25 +10,26 @@ import java.io.File
 import java.util.concurrent.Executors
 
 /**
- * Holds the conversation. Messages always live in memory; when persistence is on they are
- * also written to one small private JSON file so they survive closing the app.
- * Anything older than [RETENTION_MS] is removed.
+ * Holds the conversation. Messages always live in memory; when the chosen retention persists,
+ * they are also written to one small private JSON file so they survive closing the app.
+ * Anything older than the retention period is removed, together with its attached files.
  */
 class MessageStore(context: Context) {
 
     private val file = File(context.filesDir, FILE_NAME)
+    private val attachmentsRoot = File(context.filesDir, AttachmentStore.DIR)
     private val io = Executors.newSingleThreadExecutor()
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages.asStateFlow()
 
-    private var persist = true
+    private var retention = Retention.HOURS_24
     private var lastId = 0L
 
     /** Call once at start. Loads what is still fresh and drops everything expired. */
-    fun init(persistEnabled: Boolean) {
-        persist = persistEnabled
-        if (persist) {
-            val cutoff = System.currentTimeMillis() - RETENTION_MS
+    fun init(initial: Retention) {
+        retention = initial
+        if (retention.persist) {
+            val cutoff = System.currentTimeMillis() - retention.millis
             val loaded = readFile().filter { it.timestamp >= cutoff }
             _messages.value = loaded
             lastId = loaded.maxOfOrNull { it.id } ?: 0L
@@ -36,44 +37,75 @@ class MessageStore(context: Context) {
         } else {
             deleteFile()
         }
+        removeOrphanFiles(_messages.value)
     }
 
-    fun add(text: String): Message {
+    fun add(text: String, attachments: List<Attachment>): Message {
         val now = System.currentTimeMillis()
         lastId = maxOf(now, lastId + 1)
-        val message = Message(lastId, text, now)
+        val message = Message(lastId, text, now, attachments)
         _messages.value = _messages.value + message
         save()
         return message
     }
 
     fun delete(id: Long) {
+        val removed = _messages.value.filter { it.id == id }
         _messages.value = _messages.value.filterNot { it.id == id }
+        deleteFiles(removed)
         save()
     }
 
     fun clear() {
+        val removed = _messages.value
         _messages.value = emptyList()
+        deleteFiles(removed)
         save()
     }
 
-    /** Removes messages older than 24 hours. Cheap, so it is called often. */
+    /** Removes messages older than the retention period. Cheap, so it is called often. */
     fun purgeExpired(now: Long = System.currentTimeMillis()) {
-        val cutoff = now - RETENTION_MS
+        val cutoff = now - retention.millis
         val current = _messages.value
-        if (current.any { it.timestamp < cutoff }) {
+        val expired = current.filter { it.timestamp < cutoff }
+        if (expired.isNotEmpty()) {
             _messages.value = current.filter { it.timestamp >= cutoff }
+            deleteFiles(expired)
             save()
         }
     }
 
-    fun setPersistence(enabled: Boolean) {
-        persist = enabled
-        if (enabled) save() else deleteFile()
+    fun setRetention(value: Retention) {
+        retention = value
+        purgeExpired()
+        if (value.persist) save() else deleteFile()
+    }
+
+    private fun deleteFiles(messages: List<Message>) {
+        val attachments = messages.flatMap { it.attachments }
+        if (attachments.isEmpty()) return
+        io.execute {
+            for (a in attachments) AttachmentStore.deleteFolderOf(attachmentsRoot, a)
+        }
+    }
+
+    /** Files left behind by an unsent draft or a closed session are removed at start. */
+    private fun removeOrphanFiles(kept: List<Message>) {
+        val used = kept.flatMap { it.attachments }
+            .mapNotNull { File(it.path).parentFile?.name }
+            .toSet()
+        io.execute {
+            try {
+                attachmentsRoot.listFiles()?.forEach { folder ->
+                    if (folder.name !in used) folder.deleteRecursively()
+                }
+            } catch (_: Exception) {
+            }
+        }
     }
 
     private fun save() {
-        if (!persist) return
+        if (!retention.persist) return
         val snapshot = _messages.value
         io.execute {
             try {
@@ -82,11 +114,22 @@ class MessageStore(context: Context) {
                 } else {
                     val array = JSONArray()
                     for (m in snapshot) {
+                        val files = JSONArray()
+                        for (a in m.attachments) {
+                            files.put(
+                                JSONObject()
+                                    .put("n", a.name)
+                                    .put("m", a.mime)
+                                    .put("p", a.path)
+                                    .put("s", a.size)
+                            )
+                        }
                         array.put(
                             JSONObject()
                                 .put("id", m.id)
                                 .put("text", m.text)
                                 .put("ts", m.timestamp)
+                                .put("files", files)
                         )
                     }
                     val tmp = File(file.parentFile, "$FILE_NAME.tmp")
@@ -118,7 +161,21 @@ class MessageStore(context: Context) {
             val out = ArrayList<Message>(array.length())
             for (i in 0 until array.length()) {
                 val o = array.getJSONObject(i)
-                out.add(Message(o.getLong("id"), o.getString("text"), o.getLong("ts")))
+                val attachments = ArrayList<Attachment>()
+                val files = o.optJSONArray("files")
+                if (files != null) {
+                    for (j in 0 until files.length()) {
+                        val f = files.getJSONObject(j)
+                        val attachment = Attachment(
+                            name = f.getString("n"),
+                            mime = f.getString("m"),
+                            path = f.getString("p"),
+                            size = f.optLong("s", 0L)
+                        )
+                        if (File(attachment.path).exists()) attachments.add(attachment)
+                    }
+                }
+                out.add(Message(o.getLong("id"), o.getString("text"), o.getLong("ts"), attachments))
             }
             out
         } catch (_: Exception) {
@@ -127,7 +184,6 @@ class MessageStore(context: Context) {
     }
 
     companion object {
-        const val RETENTION_MS = 24L * 60L * 60L * 1000L
         private const val FILE_NAME = "messages.json"
     }
 }
