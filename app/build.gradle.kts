@@ -27,6 +27,11 @@ android {
         targetSdk = 35
         versionCode = buildNumber
         versionName = "1.4.$buildNumber"
+
+        // Phones are ARM; leaving out the emulator (x86) builds halves the size of the APK.
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
     }
 
     // "direct" = the APK people install from the link; it can update itself.
