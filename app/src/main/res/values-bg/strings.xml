@@ -158,9 +158,14 @@
     <string name="set_ai_intro">Нужно е за две неща: превръщане на аудио и видео файлове в текст и по-точна пунктуация. И двете ползват ваш собствен OpenAI API ключ (от platform.openai.com, отделен от абонамента за ChatGPT) и се таксуват по него.</string>
     <string name="attach_transcribe">Аудио или видео в текст</string>
     <string name="msg_transcribing">Превръщам записа в текст… може да отнеме минута.</string>
-    <string name="msg_transcribe_needs_key">Първо въведете своя OpenAI API ключ в раздел „OpenAI“ по-долу.</string>
+    <string name="msg_transcribe_needs_key">За превръщане на записи в текст е нужен OpenAI API ключ.</string>
     <string name="msg_transcribe_no_audio">От този файл не може да се прочете говор. Поддържат се mp3, m4a, wav, ogg, flac и видео със звук AAC (mp4, mov, 3gp).</string>
     <string name="msg_transcribe_too_long">Записът е твърде дълъг. Ограничението е около 24 MB звук, приблизително 25 минути.</string>
     <string name="msg_transcribe_bad_key">OpenAI отхвърли API ключа. Проверете го в настройките.</string>
     <string name="msg_transcribe_failed">Транскрипцията не успя. Проверете интернет връзката и баланса на акаунта си в OpenAI.</string>
+
+    <string name="key_dialog_title">Нужен е ключ от OpenAI</string>
+    <string name="key_dialog_text">Телефонът не може сам да прочете говор от файл, затова записът се изпраща към OpenAI, за да стане на текст. За това е нужен ваш собствен OpenAI API ключ. Той е отделен от абонамента за ChatGPT и се плаща на минута запис.\n\nПоставете ключа тук еднократно. Пази се само на този телефон.</string>
+    <string name="key_dialog_get">Откъде да взема ключ?</string>
+    <string name="key_dialog_save">Запази и избери запис</string>
 </resources>

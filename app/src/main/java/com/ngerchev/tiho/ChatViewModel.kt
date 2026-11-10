@@ -238,7 +238,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         val s = settings.value
         if (s.aiKey.isBlank()) {
             notify(R.string.msg_transcribe_needs_key)
-            navigate(Screen.SETTINGS)
             return
         }
         transcribing = true

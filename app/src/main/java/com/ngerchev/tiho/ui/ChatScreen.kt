@@ -141,6 +141,9 @@ fun ChatScreen(vm: ChatViewModel) {
     var selecting by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf(setOf<Long>()) }
     var pendingPhoto by remember { mutableStateOf<File?>(null) }
+    // Asking for the OpenAI key right here, the first time a recording is to be transcribed.
+    var askKey by remember { mutableStateOf(false) }
+    var keyInput by remember { mutableStateOf("") }
 
     val micActive = speech.state == DictationState.LISTENING ||
         speech.state == DictationState.STARTING
@@ -356,7 +359,14 @@ fun ChatScreen(vm: ChatViewModel) {
                 onAttach = { filePicker.launch(FileKind.PICKER_MIME_TYPES) },
                 onCamera = takePhoto,
                 canTranscribe = Updater.ENABLED,
-                onTranscribe = { recordingPicker.launch(arrayOf("audio/*", "video/*")) },
+                onTranscribe = {
+                    if (settings.aiKey.isBlank()) {
+                        keyInput = ""
+                        askKey = true
+                    } else {
+                        recordingPicker.launch(arrayOf("audio/*", "video/*"))
+                    }
+                },
                 templates = settings.templates,
                 onTemplate = { vm.useTemplate(it) },
                 onEditTemplates = { vm.navigate(Screen.TEMPLATES) },
@@ -423,6 +433,53 @@ fun ChatScreen(vm: ChatViewModel) {
                 }
             }
         }
+    }
+
+    if (askKey) {
+        AlertDialog(
+            onDismissRequest = { askKey = false },
+            title = { Text(stringResource(R.string.key_dialog_title)) },
+            text = {
+                Column {
+                    Text(
+                        text = stringResource(R.string.key_dialog_text),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = keyInput,
+                        onValueChange = { keyInput = it.trim() },
+                        label = { Text(stringResource(R.string.set_ai_key)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    TextButton(
+                        onClick = { openLink(context, "https://platform.openai.com/api-keys") },
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text(stringResource(R.string.key_dialog_get))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = keyInput.isNotBlank(),
+                    onClick = {
+                        val key = keyInput
+                        vm.updateSettings { it.copy(aiKey = key) }
+                        askKey = false
+                        recordingPicker.launch(arrayOf("audio/*", "video/*"))
+                    }
+                ) {
+                    Text(stringResource(R.string.key_dialog_save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { askKey = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
     }
 
     if (confirmClear) {
@@ -1217,6 +1274,13 @@ private fun loadThumbnail(path: String, maxSide: Int): ImageBitmap? {
         bitmap.asImageBitmap()
     } catch (_: Throwable) {
         null
+    }
+}
+
+private fun openLink(context: Context, url: String) {
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    } catch (_: Exception) {
     }
 }
 

@@ -163,9 +163,14 @@
     <string name="set_ai_intro">Needed for two things: turning audio and video files into text, and more accurate punctuation. Both use your own OpenAI API key (platform.openai.com, separate from a ChatGPT subscription) and are billed to it.</string>
     <string name="attach_transcribe">Audio or video to text</string>
     <string name="msg_transcribing">Turning the recording into text… this can take a minute.</string>
-    <string name="msg_transcribe_needs_key">Enter your OpenAI API key first, in the OpenAI section below.</string>
+    <string name="msg_transcribe_needs_key">An OpenAI API key is needed to turn recordings into text.</string>
     <string name="msg_transcribe_no_audio">No speech could be read from this file. Supported: mp3, m4a, wav, ogg, flac and video with AAC sound (mp4, mov, 3gp).</string>
     <string name="msg_transcribe_too_long">The recording is too long. The limit is about 24 MB of sound, roughly 25 minutes.</string>
     <string name="msg_transcribe_bad_key">OpenAI rejected the API key. Check it in the settings.</string>
     <string name="msg_transcribe_failed">The transcription did not succeed. Check the internet connection and the balance of your OpenAI account.</string>
+
+    <string name="key_dialog_title">An OpenAI key is needed</string>
+    <string name="key_dialog_text">The phone cannot read speech from a file by itself, so the recording is sent to OpenAI to be turned into text. For that you need your own OpenAI API key. It is separate from a ChatGPT subscription and is paid per minute of recording.\n\nPaste the key here once. It is stored only on this phone.</string>
+    <string name="key_dialog_get">Where do I get a key?</string>
+    <string name="key_dialog_save">Save and choose a recording</string>
 </resources>

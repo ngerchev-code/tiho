@@ -28,11 +28,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,9 +64,21 @@ import com.ngerchev.tiho.update.Updater
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SubScreen(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
+private fun SubScreen(
+    vm: ChatViewModel,
+    title: String,
+    onBack: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    val context = LocalContext.current
+    val snackbar = remember { SnackbarHostState() }
+    // Short notices (for example "you have the latest version") show on this screen too.
+    LaunchedEffect(Unit) {
+        vm.events.collect { resId -> snackbar.showSnackbar(context.getString(resId)) }
+    }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -96,7 +111,7 @@ private fun SubScreen(title: String, onBack: () -> Unit, content: @Composable ()
 @Composable
 fun LanguageScreen(vm: ChatViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
-    SubScreen(stringResource(R.string.language_title), onBack = { vm.navigate(Screen.CHAT) }) {
+    SubScreen(vm, stringResource(R.string.language_title), onBack = { vm.navigate(Screen.CHAT) }) {
         RadioRow(
             label = stringResource(R.string.lang_bg),
             selected = settings.languageTag == SettingsStore.LANG_BG,
@@ -136,7 +151,7 @@ private fun RadioRow(label: String, selected: Boolean, onSelect: () -> Unit) {
 fun SettingsScreen(vm: ChatViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val dark = LocalIsDark.current
-    SubScreen(stringResource(R.string.settings_title), onBack = { vm.navigate(Screen.CHAT) }) {
+    SubScreen(vm, stringResource(R.string.settings_title), onBack = { vm.navigate(Screen.CHAT) }) {
 
         // ---- Appearance ----
         SectionTitle(stringResource(R.string.sec_appearance))
@@ -376,7 +391,7 @@ private fun QuickTargetsRow(chosen: List<SendTarget>, onChange: (List<SendTarget
 fun TemplatesScreen(vm: ChatViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     var draft by remember { mutableStateOf("") }
-    SubScreen(stringResource(R.string.templates_title), onBack = { vm.navigate(Screen.CHAT) }) {
+    SubScreen(vm, stringResource(R.string.templates_title), onBack = { vm.navigate(Screen.CHAT) }) {
         Text(
             text = stringResource(R.string.templates_text),
             style = MaterialTheme.typography.bodyMedium,
@@ -497,7 +512,7 @@ fun AboutScreen(vm: ChatViewModel) {
             ""
         }
     }
-    SubScreen(stringResource(R.string.about_title), onBack = { vm.navigate(Screen.CHAT) }) {
+    SubScreen(vm, stringResource(R.string.about_title), onBack = { vm.navigate(Screen.CHAT) }) {
         Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.app_name),
