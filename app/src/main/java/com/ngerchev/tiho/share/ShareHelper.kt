@@ -33,8 +33,11 @@ object ShareHelper {
         }
     }
 
+    fun uriForFile(context: Context, file: File): Uri =
+        FileProvider.getUriForFile(context, context.packageName + ".files", file)
+
     private fun uriFor(context: Context, attachment: Attachment): Uri =
-        FileProvider.getUriForFile(context, context.packageName + ".files", File(attachment.path))
+        uriForFile(context, File(attachment.path))
 
     private fun buildIntent(context: Context, text: String, attachments: List<Attachment>): Intent {
         val existing = attachments.filter { File(it.path).exists() }
@@ -87,6 +90,18 @@ object ShareHelper {
             buildIntent(context, text, attachments)
         } catch (_: Exception) {
             return ShareResult.FAILED
+        }
+
+        if (target == SendTarget.EMAIL) {
+            // Limits the choice to e-mail apps, attachments included.
+            intent.selector = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
+            try {
+                context.startActivity(intent)
+                return ShareResult.OPENED_APP
+            } catch (_: Exception) {
+            }
+            intent.selector = null
+            return if (openMenu(context, intent)) ShareResult.OPENED_MENU_FALLBACK else ShareResult.FAILED
         }
 
         val packageName = target.packageName

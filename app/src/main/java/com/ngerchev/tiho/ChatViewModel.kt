@@ -10,6 +10,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.ngerchev.tiho.ai.AiPunctuation
 import com.ngerchev.tiho.data.AppSettings
 import com.ngerchev.tiho.data.Attachment
 import com.ngerchev.tiho.data.AttachmentStore
@@ -22,6 +23,7 @@ import com.ngerchev.tiho.speech.SpeechController
 import com.ngerchev.tiho.speech.SpeechNotice
 import com.ngerchev.tiho.speech.SpeechUiState
 import com.ngerchev.tiho.speech.TextFormatter
+import com.ngerchev.tiho.translate.Translator
 import com.ngerchev.tiho.update.UpdateState
 import com.ngerchev.tiho.update.Updater
 import kotlinx.coroutines.Dispatchers
@@ -33,8 +35,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
-enum class Screen { CHAT, LANGUAGE, SETTINGS, ABOUT }
+enum class Screen { CHAT, LANGUAGE, SETTINGS, TEMPLATES, ABOUT }
 
 /** The single ViewModel of the app (MVVM): owns the state, the UI only renders it. */
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
@@ -153,7 +156,84 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         draftAttachments.clear()
         setDraftText("")
         sentences.forEachIndexed { index, sentence ->
-            messageStore.add(sentence, if (index == 0) files else emptyList())
+            improve(messageStore.add(sentence, if (index == 0) files else emptyList()))
+        }
+    }
+
+    /**
+     * Optional online steps for a dictated message, both off by default: better punctuation
+     * through the user's own OpenAI key, and translation to the other language. The bubble
+     * appears at once and its text is replaced when the result arrives.
+     */
+    private fun improve(message: Message) {
+        val s = settings.value
+        val useAi = Updater.ENABLED && s.aiPunctuation && s.aiKey.isNotBlank()
+        val useTranslation = Translator.ENABLED && s.autoTranslate
+        if (!useAi && !useTranslation) return
+        viewModelScope.launch {
+            var text = message.text
+            if (useAi) {
+                val better = withContext(Dispatchers.IO) { AiPunctuation.fix(text, s.aiKey, s.aiModel) }
+                if (better != null) {
+                    text = better
+                    messageStore.updateText(message.id, text)
+                }
+            }
+            if (useTranslation) {
+                val translated = Translator.translate(text, toEnglish = s.languageTag.startsWith("bg"))
+                if (translated != null) {
+                    messageStore.updateText(message.id, translated)
+                } else {
+                    notify(R.string.msg_translate_failed)
+                }
+            }
+        }
+    }
+
+    /** Adds the translation of a message as a new bubble under it. */
+    fun translateMessage(id: Long) {
+        if (!Translator.ENABLED) return
+        val message = messages.value.firstOrNull { it.id == id } ?: return
+        if (message.text.isBlank()) return
+        val cyrillic = message.text.any { it in '\u0400'..'\u04FF' }
+        notify(R.string.msg_translating)
+        viewModelScope.launch {
+            val translated = Translator.translate(message.text, toEnglish = cyrillic)
+            if (translated != null) {
+                messageStore.add(translated, emptyList())
+            } else {
+                notify(R.string.msg_translate_failed)
+            }
+        }
+    }
+
+    // ---- templates ----
+
+    /** A ready-made phrase goes straight into the chat as its own bubble. */
+    fun useTemplate(text: String) {
+        messageStore.add(text, emptyList())
+    }
+
+    fun addTemplate(text: String) {
+        val clean = text.trim()
+        if (clean.isEmpty()) return
+        settingsStore.update { it.copy(templates = it.templates + clean) }
+    }
+
+    fun removeTemplate(index: Int) {
+        settingsStore.update { s -> s.copy(templates = s.templates.filterIndexed { i, _ -> i != index }) }
+    }
+
+    // ---- camera ----
+
+    fun newPhotoFile(): File = attachmentStore.newPhotoFile()
+
+    fun onPhotoTaken(file: File, saved: Boolean) {
+        val attachment = if (saved) attachmentStore.photoAttachment(file) else null
+        if (attachment != null) {
+            draftAttachments.add(attachment)
+        } else {
+            viewModelScope.launch(Dispatchers.IO) { attachmentStore.discard(file) }
         }
     }
 

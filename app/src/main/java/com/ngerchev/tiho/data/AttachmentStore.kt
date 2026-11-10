@@ -4,6 +4,9 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 enum class ImportError { UNSUPPORTED, TOO_LARGE, FAILED }
 
@@ -77,6 +80,30 @@ class AttachmentStore(private val context: Context) {
     private fun fail(dir: File, error: ImportError): ImportResult {
         dir.deleteRecursively()
         return ImportResult(null, error)
+    }
+
+    /** An empty file for the camera app to write a new photo into. */
+    fun newPhotoFile(): File {
+        val dir = File(root, System.nanoTime().toString())
+        dir.mkdirs()
+        val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        return File(dir, "photo_$stamp.jpg")
+    }
+
+    /** Turns a finished camera photo into an attachment; null when nothing was saved. */
+    fun photoAttachment(file: File): Attachment? =
+        if (file.exists() && file.length() > 0) {
+            Attachment(file.name, "image/jpeg", file.absolutePath, file.length())
+        } else {
+            null
+        }
+
+    fun discard(file: File) {
+        try {
+            val folder = file.parentFile ?: return
+            if (folder.parentFile?.absolutePath == root.absolutePath) folder.deleteRecursively()
+        } catch (_: Exception) {
+        }
     }
 
     fun delete(attachment: Attachment) {

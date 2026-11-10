@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -33,17 +34,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ngerchev.tiho.ChatViewModel
 import com.ngerchev.tiho.R
+import com.ngerchev.tiho.ai.AiPunctuation
 import com.ngerchev.tiho.Screen
 import com.ngerchev.tiho.data.Accent
 import com.ngerchev.tiho.data.Retention
@@ -51,6 +56,7 @@ import com.ngerchev.tiho.data.SendTarget
 import com.ngerchev.tiho.data.SettingsStore
 import com.ngerchev.tiho.data.TextSize
 import com.ngerchev.tiho.data.ThemeMode
+import com.ngerchev.tiho.translate.Translator
 import com.ngerchev.tiho.update.Updater
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -219,6 +225,65 @@ fun SettingsScreen(vm: ChatViewModel) {
             onChange = { value -> vm.updateSettings { it.copy(haptics = value) } }
         )
 
+        if (Translator.ENABLED) {
+            SwitchRow(
+                title = stringResource(R.string.set_translate_title),
+                text = stringResource(R.string.set_translate_text),
+                checked = settings.autoTranslate,
+                onChange = { value -> vm.updateSettings { it.copy(autoTranslate = value) } }
+            )
+        }
+
+        // ---- AI punctuation (optional, needs the internet edition) ----
+        if (Updater.ENABLED) {
+            SectionTitle(stringResource(R.string.sec_ai))
+            SwitchRow(
+                title = stringResource(R.string.set_ai_title),
+                text = stringResource(R.string.set_ai_text),
+                checked = settings.aiPunctuation,
+                onChange = { value -> vm.updateSettings { it.copy(aiPunctuation = value) } }
+            )
+            if (settings.aiPunctuation) {
+                OutlinedTextField(
+                    value = settings.aiKey,
+                    onValueChange = { value -> vm.updateSettings { it.copy(aiKey = value.trim()) } },
+                    label = { Text(stringResource(R.string.set_ai_key)) },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = settings.aiModel,
+                    onValueChange = { value -> vm.updateSettings { it.copy(aiModel = value.trim()) } },
+                    label = { Text(stringResource(R.string.set_ai_model)) },
+                    placeholder = { Text(AiPunctuation.DEFAULT_MODEL) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        // ---- Quick buttons and templates ----
+        SectionTitle(stringResource(R.string.sec_quick))
+        Text(
+            text = stringResource(R.string.set_quick_text),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(6.dp))
+        QuickTargetsRow(
+            chosen = settings.quickTargets,
+            onChange = { value -> vm.updateSettings { it.copy(quickTargets = value) } }
+        )
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = { vm.navigate(Screen.TEMPLATES) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.templates_title))
+        }
+
         // ---- Sending ----
         SectionTitle(stringResource(R.string.sec_sending))
         Text(
@@ -275,6 +340,84 @@ fun SettingsScreen(vm: ChatViewModel) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(Modifier.height(24.dp))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun QuickTargetsRow(chosen: List<SendTarget>, onChange: (List<SendTarget>) -> Unit) {
+    val options = listOf(
+        SendTarget.VIBER, SendTarget.WHATSAPP, SendTarget.TELEGRAM,
+        SendTarget.MESSENGER, SendTarget.EMAIL, SendTarget.CHATGPT
+    )
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        options.forEach { target ->
+            val on = target in chosen
+            FilterChip(
+                selected = on,
+                onClick = { onChange(if (on) chosen - target else chosen + target) },
+                label = { Text(target.title ?: target.name) }
+            )
+        }
+    }
+}
+
+@Composable
+fun TemplatesScreen(vm: ChatViewModel) {
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    var draft by remember { mutableStateOf("") }
+    SubScreen(stringResource(R.string.templates_title), onBack = { vm.navigate(Screen.CHAT) }) {
+        Text(
+            text = stringResource(R.string.templates_text),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(12.dp))
+        settings.templates.forEachIndexed { index, template ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = template,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 10.dp)
+                )
+                IconButton(onClick = { vm.removeTemplate(index) }) {
+                    Icon(
+                        painterResource(R.drawable.ic_delete),
+                        contentDescription = stringResource(R.string.msg_action_delete),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        }
+        Spacer(Modifier.height(16.dp))
+        OutlinedTextField(
+            value = draft,
+            onValueChange = { draft = it },
+            label = { Text(stringResource(R.string.templates_new)) },
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 3
+        )
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = {
+                vm.addTemplate(draft)
+                draft = ""
+            },
+            enabled = draft.isNotBlank(),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.templates_add))
+        }
         Spacer(Modifier.height(24.dp))
     }
 }

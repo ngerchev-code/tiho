@@ -26,7 +26,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = buildNumber
-        versionName = "1.3.$buildNumber"
+        versionName = "1.4.$buildNumber"
     }
 
     // "direct" = the APK people install from the link; it can update itself.
@@ -81,4 +81,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
+
+    // On-device translation. Only in the "direct" edition: the library needs the internet
+    // once, to download the language pack.
+    "directImplementation"("com.google.mlkit:translate:17.0.3")
 }

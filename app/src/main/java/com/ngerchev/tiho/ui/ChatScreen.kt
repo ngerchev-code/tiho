@@ -13,6 +13,7 @@ import android.os.Build
 import android.provider.Settings
 import android.text.format.DateFormat
 import android.text.format.Formatter
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.RepeatMode
@@ -20,6 +21,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -113,8 +115,10 @@ import com.ngerchev.tiho.speech.DictationState
 import com.ngerchev.tiho.speech.SpeechEngine
 import com.ngerchev.tiho.speech.SpeechNotice
 import com.ngerchev.tiho.speech.SpeechUiState
+import com.ngerchev.tiho.translate.Translator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.Calendar
 import java.util.Date
 
@@ -132,6 +136,10 @@ fun ChatScreen(vm: ChatViewModel) {
     val listState = rememberLazyListState()
     var menuOpen by remember { mutableStateOf(false) }
     var confirmClear by remember { mutableStateOf(false) }
+    // Messages ticked to be sent together. "selecting" switches the screen into that mode.
+    var selecting by remember { mutableStateOf(false) }
+    var selected by remember { mutableStateOf(setOf<Long>()) }
+    var pendingPhoto by remember { mutableStateOf<File?>(null) }
 
     val micActive = speech.state == DictationState.LISTENING ||
         speech.state == DictationState.STARTING
@@ -147,6 +155,28 @@ fun ChatScreen(vm: ChatViewModel) {
     ) { uris ->
         if (uris.isNotEmpty()) vm.addAttachments(uris)
     }
+
+    // The phone's camera app takes the photo; this app needs no camera permission.
+    val camera = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { saved ->
+        pendingPhoto?.let { vm.onPhotoTaken(it, saved) }
+        pendingPhoto = null
+    }
+    val takePhoto: () -> Unit = {
+        try {
+            val file = vm.newPhotoFile()
+            pendingPhoto = file
+            camera.launch(ShareHelper.uriForFile(context, file))
+        } catch (_: Exception) {
+            vm.notify(R.string.msg_no_camera)
+        }
+    }
+    val leaveSelection: () -> Unit = {
+        selecting = false
+        selected = emptySet()
+    }
+    BackHandler(enabled = selecting) { leaveSelection() }
 
     LaunchedEffect(Unit) {
         vm.events.collect { resId -> snackbar.showSnackbar(context.getString(resId)) }
@@ -216,7 +246,31 @@ fun ChatScreen(vm: ChatViewModel) {
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
-            TopAppBar(
+            if (selecting) {
+                val chosen = messages.filter { it.id in selected }
+                SelectionBar(
+                    count = chosen.size,
+                    onClose = leaveSelection,
+                    onSend = {
+                        if (chosen.isNotEmpty()) {
+                            sendTo(
+                                SendTarget.SHARE_MENU,
+                                chosen.map { it.text }.filter { it.isNotBlank() }.joinToString("\n\n"),
+                                chosen.flatMap { it.attachments }
+                            )
+                        }
+                        leaveSelection()
+                    },
+                    onCopy = {
+                        copyText(chosen.map { it.text }.filter { it.isNotBlank() }.joinToString("\n\n"))
+                        leaveSelection()
+                    },
+                    onDelete = {
+                        chosen.forEach { vm.deleteMessage(it.id) }
+                        leaveSelection()
+                    }
+                )
+            } else TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 ),
@@ -294,6 +348,10 @@ fun ChatScreen(vm: ChatViewModel) {
                 importing = vm.importing,
                 onDraftChange = vm::onDraftChange,
                 onAttach = { filePicker.launch(FileKind.PICKER_MIME_TYPES) },
+                onCamera = takePhoto,
+                templates = settings.templates,
+                onTemplate = { vm.useTemplate(it) },
+                onEditTemplates = { vm.navigate(Screen.TEMPLATES) },
                 onRemoveAttachment = { vm.removeDraftAttachment(it) },
                 onMic = onMic,
                 onStop = { vm.stopDictation() },
@@ -329,6 +387,23 @@ fun ChatScreen(vm: ChatViewModel) {
                     item(key = message.id) {
                         MessageBubble(
                             message = message,
+                            selecting = selecting,
+                            selected = message.id in selected,
+                            quickTargets = settings.quickTargets,
+                            canTranslate = Translator.ENABLED,
+                            onToggle = {
+                                selected = if (message.id in selected) {
+                                    selected - message.id
+                                } else {
+                                    selected + message.id
+                                }
+                            },
+                            onStartSelect = {
+                                selecting = true
+                                selected = setOf(message.id)
+                            },
+                            onQuick = { target -> sendTo(target, message.text, message.attachments) },
+                            onTranslate = { vm.translateMessage(message.id) },
                             onCopy = { copyText(message.text) },
                             onSendTo = { sendTo(SendTarget.SHARE_MENU, message.text, message.attachments) },
                             onChatGpt = { sendTo(SendTarget.CHATGPT, message.text, message.attachments) },
@@ -427,9 +502,50 @@ private fun DaySeparator(timestamp: Long) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SelectionBar(
+    count: Int,
+    onClose: () -> Unit,
+    onSend: () -> Unit,
+    onCopy: () -> Unit,
+    onDelete: () -> Unit
+) {
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        title = { Text(stringResource(R.string.selection_count, count)) },
+        navigationIcon = {
+            IconButton(onClick = onClose) {
+                Icon(painterResource(R.drawable.ic_close), stringResource(R.string.action_cancel))
+            }
+        },
+        actions = {
+            IconButton(onClick = onCopy, enabled = count > 0) {
+                Icon(painterResource(R.drawable.ic_copy), stringResource(R.string.msg_action_copy))
+            }
+            IconButton(onClick = onDelete, enabled = count > 0) {
+                Icon(painterResource(R.drawable.ic_delete), stringResource(R.string.msg_action_delete))
+            }
+            IconButton(onClick = onSend, enabled = count > 0) {
+                Icon(painterResource(R.drawable.ic_forward), stringResource(R.string.msg_action_send))
+            }
+        }
+    )
+}
+
 @Composable
 private fun MessageBubble(
     message: Message,
+    selecting: Boolean,
+    selected: Boolean,
+    quickTargets: List<SendTarget>,
+    canTranslate: Boolean,
+    onToggle: () -> Unit,
+    onStartSelect: () -> Unit,
+    onQuick: (SendTarget) -> Unit,
+    onTranslate: () -> Unit,
     onCopy: () -> Unit,
     onSendTo: () -> Unit,
     onChatGpt: () -> Unit,
@@ -446,27 +562,41 @@ private fun MessageBubble(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 48.dp),
+            .padding(start = 40.dp),
         horizontalAlignment = Alignment.End
     ) {
         Box {
             Surface(
-                onClick = { menuOpen = true },
+                onClick = { if (selecting) onToggle() else menuOpen = true },
                 shape = RoundedCornerShape(
                     topStart = 20.dp, topEnd = 20.dp, bottomEnd = 6.dp, bottomStart = 20.dp
                 ),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.primaryContainer
+                },
+                contentColor = if (selected) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                },
+                border = if (selecting && !selected) {
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                } else {
+                    null
+                }
             ) {
                 Column(
                     modifier = Modifier.padding(6.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     message.attachments.forEach { attachment ->
+                        val open: () -> Unit = { if (selecting) onToggle() else onOpenFile(attachment) }
                         if (attachment.kind == FileKind.IMAGE) {
-                            ImageAttachment(attachment) { onOpenFile(attachment) }
+                            ImageAttachment(attachment, open)
                         } else {
-                            FileAttachment(attachment) { onOpenFile(attachment) }
+                            FileAttachment(attachment, open)
                         }
                     }
                     if (message.text.isNotBlank()) {
@@ -491,6 +621,13 @@ private fun MessageBubble(
                     leadingIcon = { Icon(painterResource(R.drawable.ic_share), null) },
                     onClick = { menuOpen = false; onChatGpt() }
                 )
+                if (canTranslate && message.text.isNotBlank()) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.msg_action_translate)) },
+                        leadingIcon = { Icon(painterResource(R.drawable.ic_bolt), null) },
+                        onClick = { menuOpen = false; onTranslate() }
+                    )
+                }
                 if (message.text.isNotBlank()) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.msg_action_copy)) },
@@ -504,43 +641,66 @@ private fun MessageBubble(
                     onClick = { menuOpen = false; onEdit() }
                 )
                 DropdownMenuItem(
+                    text = { Text(stringResource(R.string.msg_action_select)) },
+                    leadingIcon = { Icon(painterResource(R.drawable.ic_more), null) },
+                    onClick = { menuOpen = false; onStartSelect() }
+                )
+                DropdownMenuItem(
                     text = { Text(stringResource(R.string.msg_action_delete)) },
-                    leadingIcon = { Icon(painterResource(R.drawable.ic_close), null) },
+                    leadingIcon = { Icon(painterResource(R.drawable.ic_delete), null) },
                     onClick = { menuOpen = false; onDelete() }
                 )
             }
         }
+        // Under the bubble: the time and one-tap buttons that send just this message.
         Row(
-            modifier = Modifier.padding(top = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = time,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(Modifier.width(8.dp))
-            // Every bubble is sent on its own: this hands just this message to another app.
-            Surface(
-                onClick = onSendTo,
-                shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Row(
-                    modifier = Modifier.padding(start = 12.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            if (!selecting) {
+                quickTargets.forEach { target ->
+                    Surface(
+                        onClick = { onQuick(target) },
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ) {
+                        Text(
+                            text = target.title ?: target.name,
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+                Surface(
+                    onClick = onSendTo,
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
-                    Text(
-                        text = stringResource(R.string.msg_send_short),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    Spacer(Modifier.width(2.dp))
-                    Icon(
-                        painterResource(R.drawable.ic_forward),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Row(
+                        modifier = Modifier.padding(start = 12.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.msg_send_short),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        Spacer(Modifier.width(2.dp))
+                        Icon(
+                            painterResource(R.drawable.ic_forward),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }
@@ -649,6 +809,10 @@ private fun Composer(
     importing: Boolean,
     onDraftChange: (TextFieldValue) -> Unit,
     onAttach: () -> Unit,
+    onCamera: () -> Unit,
+    templates: List<String>,
+    onTemplate: (String) -> Unit,
+    onEditTemplates: () -> Unit,
     onRemoveAttachment: (Attachment) -> Unit,
     onMic: () -> Unit,
     onStop: () -> Unit,
@@ -659,6 +823,8 @@ private fun Composer(
     onOpenAppSettings: () -> Unit
 ) {
     val scale = LocalMessageScale.current
+    var attachMenu by remember { mutableStateOf(false) }
+    var templateMenu by remember { mutableStateOf(false) }
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
@@ -708,12 +874,24 @@ private fun Composer(
             }
 
             Row(verticalAlignment = Alignment.Bottom) {
-                IconButton(onClick = onAttach, modifier = Modifier.size(52.dp)) {
-                    Icon(
-                        painterResource(R.drawable.ic_attach),
-                        contentDescription = stringResource(R.string.cd_attach),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                Box {
+                    IconButton(onClick = { attachMenu = true }, modifier = Modifier.size(48.dp)) {
+                        Icon(
+                            painterResource(R.drawable.ic_attach),
+                            contentDescription = stringResource(R.string.cd_attach),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    DropdownMenu(expanded = attachMenu, onDismissRequest = { attachMenu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.attach_file)) },
+                            onClick = { attachMenu = false; onAttach() }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.attach_camera)) },
+                            onClick = { attachMenu = false; onCamera() }
+                        )
+                    }
                 }
                 OutlinedTextField(
                     value = draft,
@@ -727,6 +905,35 @@ private fun Composer(
                     shape = RoundedCornerShape(22.dp),
                     maxLines = 5
                 )
+                Box {
+                    IconButton(onClick = { templateMenu = true }, modifier = Modifier.size(48.dp)) {
+                        Icon(
+                            painterResource(R.drawable.ic_bolt),
+                            contentDescription = stringResource(R.string.cd_templates),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    DropdownMenu(expanded = templateMenu, onDismissRequest = { templateMenu = false }) {
+                        templates.forEach { template ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = template,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.widthIn(max = 260.dp)
+                                    )
+                                },
+                                onClick = { templateMenu = false; onTemplate(template) }
+                            )
+                        }
+                        if (templates.isNotEmpty()) HorizontalDivider()
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.templates_edit)) },
+                            onClick = { templateMenu = false; onEditTemplates() }
+                        )
+                    }
+                }
             }
 
             if (showPunctuationKeys) {

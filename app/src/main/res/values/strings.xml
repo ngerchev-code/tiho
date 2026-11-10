@@ -133,4 +133,29 @@
     <string name="set_auto_punct_text">Adds the capital letter, a full stop or question mark, and commas before words like “but” or “че”, “защото”. It follows simple rules and can miss.</string>
     <string name="msg_action_edit">Edit</string>
     <string name="msg_send_short">Send</string>
+
+    <!-- Added in 1.4 -->
+    <string name="msg_no_camera">No camera app was found on this phone.</string>
+    <string name="msg_translating">Translating… the first time a language pack is downloaded.</string>
+    <string name="msg_translate_failed">The translation did not succeed. The first time it needs the internet to download the language pack.</string>
+    <string name="msg_action_translate">Translate</string>
+    <string name="msg_action_select">Select several</string>
+    <string name="selection_count">%1$d selected</string>
+    <string name="attach_file">File from the phone</string>
+    <string name="attach_camera">Take a photo</string>
+    <string name="cd_templates">Ready phrases</string>
+    <string name="templates_edit">Edit the phrases…</string>
+    <string name="templates_title">Ready phrases</string>
+    <string name="templates_text">Phrases you use often. In the chat, the lightning button puts one in as a message with a single tap.</string>
+    <string name="templates_new">New phrase</string>
+    <string name="templates_add">Add</string>
+    <string name="set_translate_title">Translate what I dictate</string>
+    <string name="set_translate_text">Bulgarian speech becomes an English message and the other way round. Translated on the phone; the language pack is downloaded once.</string>
+    <string name="sec_ai">AI punctuation (optional)</string>
+    <string name="set_ai_title">Punctuation by OpenAI</string>
+    <string name="set_ai_text">More accurate than the built-in rules. Needs your own OpenAI API key and the internet; the text of each dictated message is sent to OpenAI and usage is billed to your key.</string>
+    <string name="set_ai_key">OpenAI API key</string>
+    <string name="set_ai_model">Model (leave empty for the default)</string>
+    <string name="sec_quick">Quick buttons</string>
+    <string name="set_quick_text">Apps shown as one-tap buttons under every message.</string>
 </resources>

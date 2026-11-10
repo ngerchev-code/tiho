@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.json.JSONArray
 import java.util.Locale
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
@@ -28,6 +29,7 @@ enum class SendTarget(val packageName: String?, val title: String?) {
     WHATSAPP("com.whatsapp", "WhatsApp"),
     TELEGRAM("org.telegram.messenger", "Telegram"),
     MESSENGER("com.facebook.orca", "Messenger"),
+    EMAIL(null, "E-mail"),
     CHATGPT("com.openai.chatgpt", "ChatGPT")
 }
 
@@ -48,7 +50,17 @@ data class AppSettings(
     val afterSend: SendTarget = SendTarget.NONE,
     val keepScreenOn: Boolean = true,
     val showPunctuationKeys: Boolean = true,
-    val haptics: Boolean = true
+    val haptics: Boolean = true,
+    /** One-tap send buttons shown under every message. */
+    val quickTargets: List<SendTarget> = listOf(SendTarget.VIBER, SendTarget.WHATSAPP),
+    /** Ready-made phrases. */
+    val templates: List<String> = emptyList(),
+    /** Dictated messages are translated to the other language (Bulgarian <-> English). */
+    val autoTranslate: Boolean = false,
+    /** Optional: punctuation by the OpenAI API, with the user's own key. */
+    val aiPunctuation: Boolean = false,
+    val aiKey: String = "",
+    val aiModel: String = ""
 )
 
 /** A handful of simple preferences in private SharedPreferences. */
@@ -75,6 +87,12 @@ class SettingsStore(context: Context) {
             .putBoolean(KEY_SCREEN_ON, next.keepScreenOn)
             .putBoolean(KEY_PUNCT_KEYS, next.showPunctuationKeys)
             .putBoolean(KEY_HAPTICS, next.haptics)
+            .putString(KEY_QUICK, next.quickTargets.joinToString(",") { it.name })
+            .putString(KEY_TEMPLATES, JSONArray(next.templates).toString())
+            .putBoolean(KEY_AUTO_TRANSLATE, next.autoTranslate)
+            .putBoolean(KEY_AI, next.aiPunctuation)
+            .putString(KEY_AI_KEY, next.aiKey)
+            .putString(KEY_AI_MODEL, next.aiModel)
             .apply()
     }
 
@@ -98,8 +116,48 @@ class SettingsStore(context: Context) {
             afterSend = enumOr(prefs.getString(KEY_AFTER_SEND, null), SendTarget.NONE),
             keepScreenOn = prefs.getBoolean(KEY_SCREEN_ON, true),
             showPunctuationKeys = prefs.getBoolean(KEY_PUNCT_KEYS, true),
-            haptics = prefs.getBoolean(KEY_HAPTICS, true)
+            haptics = prefs.getBoolean(KEY_HAPTICS, true),
+            quickTargets = readQuickTargets(),
+            templates = readTemplates(defaultLanguage == LANG_BG),
+            autoTranslate = prefs.getBoolean(KEY_AUTO_TRANSLATE, false),
+            aiPunctuation = prefs.getBoolean(KEY_AI, false),
+            aiKey = prefs.getString(KEY_AI_KEY, null) ?: "",
+            aiModel = prefs.getString(KEY_AI_MODEL, null) ?: ""
         )
+    }
+
+    private fun readQuickTargets(): List<SendTarget> {
+        val saved = prefs.getString(KEY_QUICK, null)
+            ?: return listOf(SendTarget.VIBER, SendTarget.WHATSAPP)
+        return saved.split(',').mapNotNull { name -> SendTarget.values().firstOrNull { it.name == name } }
+    }
+
+    private fun readTemplates(bulgarian: Boolean): List<String> {
+        val saved = prefs.getString(KEY_TEMPLATES, null)
+        if (saved != null) {
+            try {
+                val array = JSONArray(saved)
+                return (0 until array.length()).map { array.getString(it) }
+            } catch (_: Exception) {
+            }
+        }
+        return if (bulgarian) {
+            listOf(
+                "Ще закъснея с 10 минути.",
+                "В среща съм, ще се обадя след малко.",
+                "Благодаря, получих го.",
+                "Моля, изпратете ми го на имейл.",
+                "Ще ви върна обаждане до един час."
+            )
+        } else {
+            listOf(
+                "I will be 10 minutes late.",
+                "I am in a meeting, I will call you shortly.",
+                "Thank you, I received it.",
+                "Please send it to me by e-mail.",
+                "I will call you back within the hour."
+            )
+        }
     }
 
     private inline fun <reified T : Enum<T>> enumOr(name: String?, fallback: T): T =
@@ -123,5 +181,11 @@ class SettingsStore(context: Context) {
         private const val KEY_SCREEN_ON = "keep_screen_on"
         private const val KEY_PUNCT_KEYS = "punctuation_keys"
         private const val KEY_HAPTICS = "haptics"
+        private const val KEY_QUICK = "quick_targets"
+        private const val KEY_TEMPLATES = "templates"
+        private const val KEY_AUTO_TRANSLATE = "auto_translate"
+        private const val KEY_AI = "ai_punctuation"
+        private const val KEY_AI_KEY = "ai_key"
+        private const val KEY_AI_MODEL = "ai_model"
     }
 }

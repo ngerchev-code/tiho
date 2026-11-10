@@ -18,6 +18,7 @@ import com.ngerchev.tiho.ui.AboutScreen
 import com.ngerchev.tiho.ui.ChatScreen
 import com.ngerchev.tiho.ui.LanguageScreen
 import com.ngerchev.tiho.ui.SettingsScreen
+import com.ngerchev.tiho.ui.TemplatesScreen
 import com.ngerchev.tiho.ui.TihoTheme
 import com.ngerchev.tiho.ui.UpdateDialog
 
@@ -70,6 +71,7 @@ private fun TihoApp(vm: ChatViewModel) {
         Screen.CHAT -> ChatScreen(vm)
         Screen.LANGUAGE -> LanguageScreen(vm)
         Screen.SETTINGS -> SettingsScreen(vm)
+        Screen.TEMPLATES -> TemplatesScreen(vm)
         Screen.ABOUT -> AboutScreen(vm)
     }
     UpdateDialog(vm)

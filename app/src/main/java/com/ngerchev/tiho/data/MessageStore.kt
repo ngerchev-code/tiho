@@ -64,6 +64,14 @@ class MessageStore(context: Context) {
         return message
     }
 
+    /** Replaces the text of a message (better punctuation or a translation arrived). */
+    fun updateText(id: Long, text: String) {
+        val current = _messages.value
+        if (current.none { it.id == id }) return
+        _messages.value = current.map { if (it.id == id) it.copy(text = text) else it }
+        save()
+    }
+
     fun clear() {
         val removed = _messages.value
         _messages.value = emptyList()

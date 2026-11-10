@@ -128,4 +128,29 @@
     <string name="set_auto_punct_text">Слага главна буква, точка или въпросителен знак и запетаи пред „че“, „но“, „защото“, „който“. Работи по прости правила и понякога греши.</string>
     <string name="msg_action_edit">Редактирай</string>
     <string name="msg_send_short">Изпрати</string>
+
+    <!-- Added in 1.4 -->
+    <string name="msg_no_camera">На телефона не е намерено приложение за камера.</string>
+    <string name="msg_translating">Превеждам… първия път се изтегля езиков пакет.</string>
+    <string name="msg_translate_failed">Преводът не успя. Първия път е нужен интернет, за да се изтегли езиковият пакет.</string>
+    <string name="msg_action_translate">Преведи</string>
+    <string name="msg_action_select">Избери няколко</string>
+    <string name="selection_count">Избрани: %1$d</string>
+    <string name="attach_file">Файл от телефона</string>
+    <string name="attach_camera">Снимай с камерата</string>
+    <string name="cd_templates">Готови фрази</string>
+    <string name="templates_edit">Редактирай фразите…</string>
+    <string name="templates_title">Готови фрази</string>
+    <string name="templates_text">Фрази, които ползвате често. В чата бутонът със светкавицата слага избраната като съобщение с едно докосване.</string>
+    <string name="templates_new">Нова фраза</string>
+    <string name="templates_add">Добави</string>
+    <string name="set_translate_title">Превеждай диктуваното</string>
+    <string name="set_translate_text">Казаното на български става съобщение на английски и обратно. Преводът се прави на телефона; езиковият пакет се изтегля еднократно.</string>
+    <string name="sec_ai">AI пунктуация (по избор)</string>
+    <string name="set_ai_title">Пунктуация от OpenAI</string>
+    <string name="set_ai_text">По-точна от вградените правила. Иска ваш собствен OpenAI API ключ и интернет; текстът на всяко диктувано съобщение се изпраща към OpenAI, а употребата се таксува по вашия ключ.</string>
+    <string name="set_ai_key">OpenAI API ключ</string>
+    <string name="set_ai_model">Модел (оставете празно за стандартния)</string>
+    <string name="sec_quick">Бързи бутони</string>
+    <string name="set_quick_text">Приложения, които се показват като бутони с едно докосване под всяко съобщение.</string>
 </resources>
