@@ -22,6 +22,8 @@ import com.ngerchev.tiho.speech.SpeechController
 import com.ngerchev.tiho.speech.SpeechNotice
 import com.ngerchev.tiho.speech.SpeechUiState
 import com.ngerchev.tiho.speech.TextFormatter
+import com.ngerchev.tiho.update.UpdateState
+import com.ngerchev.tiho.update.Updater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -59,6 +61,12 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     var screen by mutableStateOf(Screen.CHAT)
         private set
 
+    /** Self-update progress; stays None in the Google Play edition. */
+    var updateState by mutableStateOf<UpdateState>(UpdateState.None)
+        private set
+
+    private var lastUpdateCheck = 0L
+
     private val _events = MutableSharedFlow<Int>(extraBufferCapacity = 8)
 
     /** One-off messages for the snackbar, as string resource ids. */
@@ -73,6 +81,53 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 delay(60_000L)
             }
         }
+        checkForUpdate(manual = false)
+    }
+
+    // ---- self-update ----
+
+    /** Looks for a newer build. Automatic checks are silent; a manual one reports the result. */
+    fun checkForUpdate(manual: Boolean) {
+        if (!Updater.ENABLED) return
+        if (updateState is UpdateState.Downloading || updateState is UpdateState.Ready) return
+        lastUpdateCheck = System.currentTimeMillis()
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching { Updater.check(getApplication<Application>()) }
+            }
+            val info = result.getOrNull()
+            when {
+                info != null -> updateState = UpdateState.Available(info)
+                manual && result.isFailure -> notify(R.string.msg_update_check_failed)
+                manual -> notify(R.string.msg_up_to_date)
+            }
+        }
+    }
+
+    fun startUpdate() {
+        if (updateState is UpdateState.Downloading) return
+        updateState = UpdateState.Downloading(0f)
+        viewModelScope.launch {
+            var lastShown = 0f
+            val file = withContext(Dispatchers.IO) {
+                Updater.download(getApplication<Application>()) { progress ->
+                    // Report in steps of 2% to keep the UI calm.
+                    if (progress - lastShown >= 0.02f || progress >= 1f) {
+                        lastShown = progress
+                        viewModelScope.launch {
+                            if (updateState is UpdateState.Downloading) {
+                                updateState = UpdateState.Downloading(progress)
+                            }
+                        }
+                    }
+                }
+            }
+            updateState = if (file != null) UpdateState.Ready(file) else UpdateState.Failed
+        }
+    }
+
+    fun dismissUpdate() {
+        if (updateState !is UpdateState.Downloading) updateState = UpdateState.None
     }
 
     // ---- navigation ----
@@ -224,7 +279,13 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     // ---- lifecycle ----
 
-    fun onForeground() = messageStore.purgeExpired()
+    fun onForeground() {
+        messageStore.purgeExpired()
+        // Look for a new version again when the app comes back after a few hours.
+        if (System.currentTimeMillis() - lastUpdateCheck > UPDATE_CHECK_INTERVAL_MS) {
+            checkForUpdate(manual = false)
+        }
+    }
 
     /** The microphone is never left on when the app is not in front. */
     fun onBackground() {
@@ -238,5 +299,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object {
         private const val MAX_FILES_PER_PICK = 10
+        private const val UPDATE_CHECK_INTERVAL_MS = 3L * 60 * 60 * 1000
     }
 }

@@ -8,7 +8,7 @@
 
 ## Накратко
 
-Тихо превръща говор в текст на вашия телефон. Приложението не събира лични данни, няма акаунти, реклами и аналитика, няма разрешение за достъп до интернет и не пази аудио.
+Тихо превръща говор в текст на вашия телефон. Приложението не събира лични данни, няма акаунти, реклами и аналитика и не пази аудио. Изданието от Google Play няма разрешение за достъп до интернет. Изданието, инсталирано от връзка, ползва интернет само за да провери в GitHub за нова версия и да я изтегли; при това не се изпращат данни за вас.
 
 ## Какви данни се обработват
 
@@ -27,7 +27,7 @@
 
 ## Разрешения
 
-Само `RECORD_AUDIO` (микрофон). Можете да го отнемете по всяко време от настройките на Android.
+`RECORD_AUDIO` (микрофон) — можете да го отнемете по всяко време от настройките на Android. Само в изданието от връзка: `INTERNET` и `REQUEST_INSTALL_PACKAGES`, единствено за самообновяване.
 
 ## Деца
 
@@ -43,7 +43,7 @@
 
 *Draft. Fill in the [bracketed] fields before publishing.*
 
-Tiho converts speech to text on your phone. It collects no personal data, has no accounts, ads or analytics, holds no internet permission and stores no audio.
+Tiho converts speech to text on your phone. It collects no personal data, has no accounts, ads or analytics and stores no audio. The Google Play edition holds no internet permission. The edition installed from a link uses the internet only to check GitHub for a new version and download it; no data about you is sent.
 
 **Voice.** The microphone is used only while you dictate. Audio is never recorded or stored by the app; it is passed directly to the speech recognition service installed on your device (usually provided by Google), which returns text. With on-device recognition the audio stays on the phone. With online recognition that service sends the audio to its provider's servers for transcription under the provider's own privacy policy.
 
@@ -51,6 +51,6 @@ Tiho converts speech to text on your phone. It collects no personal data, has no
 
 **Sharing.** Nothing is sent to the developer or to third parties. Text and files leave the app only when you choose to send or copy them.
 
-**Permissions.** `RECORD_AUDIO` only.
+**Permissions.** `RECORD_AUDIO`. In the link-installed edition only: `INTERNET` and `REQUEST_INSTALL_PACKAGES`, solely for self-update.
 
 Contact: [email]

@@ -51,6 +51,7 @@ import com.ngerchev.tiho.data.SendTarget
 import com.ngerchev.tiho.data.SettingsStore
 import com.ngerchev.tiho.data.TextSize
 import com.ngerchev.tiho.data.ThemeMode
+import com.ngerchev.tiho.update.Updater
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -263,7 +264,8 @@ fun SettingsScreen(vm: ChatViewModel) {
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = stringResource(R.string.privacy_body),
+            text = stringResource(R.string.privacy_network) + "\n\n" +
+                stringResource(R.string.privacy_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -352,6 +354,12 @@ fun AboutScreen(vm: ChatViewModel) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        if (Updater.ENABLED) {
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(onClick = { vm.checkForUpdate(manual = true) }) {
+                Text(stringResource(R.string.about_check_update))
+            }
+        }
         Spacer(Modifier.height(20.dp))
         Text(
             text = stringResource(R.string.about_body),
@@ -359,7 +367,8 @@ fun AboutScreen(vm: ChatViewModel) {
         )
         Spacer(Modifier.height(20.dp))
         Text(
-            text = stringResource(R.string.privacy_body),
+            text = stringResource(R.string.privacy_network) + "\n\n" +
+                stringResource(R.string.privacy_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

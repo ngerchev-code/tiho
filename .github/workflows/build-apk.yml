@@ -21,23 +21,45 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build debug APK
+      # The signing key lives only in the repository secrets, never in the code.
+      - name: Prepare signing key
+        id: signing
+        env:
+          SIGNING_KEYSTORE: ${{ secrets.SIGNING_KEYSTORE }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          if [ -n "$SIGNING_KEYSTORE" ] && [ -n "$SIGNING_PASSWORD" ]; then
+            printf '%s' "$SIGNING_KEYSTORE" | tr -d ' \n\r' | base64 -d > release.jks
+            printf 'storeFile=release.jks\nstorePassword=%s\nkeyAlias=tiho\nkeyPassword=%s\n' \
+              "$SIGNING_PASSWORD" "$SIGNING_PASSWORD" > keystore.properties
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          if [ "${{ steps.signing.outputs.signed }}" = "true" ]; then
+            ./gradlew assembleDirectRelease --stacktrace
+            cp app/build/outputs/apk/direct/release/app-direct-release.apk Tiho.apk
+            # Installed apps read this file to learn that a newer build exists.
+            echo "{\"versionCode\": ${{ github.run_number }}, \"versionName\": \"1.2.${{ github.run_number }}\"}" > version.json
+          else
+            # No signing key yet: a test build that cannot update an installed app.
+            # Also compile the release variant, so problems show up before the key is added.
+            ./gradlew assembleDirectDebug assembleDirectRelease --stacktrace
+            cp app/build/outputs/apk/direct/debug/app-direct-debug.apk Tiho.apk
+          fi
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Tiho-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-
-      - name: Publish APK as a release (direct download link)
+      - name: Publish release
         if: github.ref == 'refs/heads/main'
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk Tiho.apk
-          gh release create "v1.0.${{ github.run_number }}" Tiho.apk \
-            --title "Tiho build ${{ github.run_number }}" \
-            --notes "Test build (debug). Download Tiho.apk and open it on the phone." \
+          FILES="Tiho.apk"
+          if [ -f version.json ]; then FILES="Tiho.apk version.json"; fi
+          gh release create "v1.2.${{ github.run_number }}" $FILES \
+            --title "Tiho 1.2.${{ github.run_number }}" \
+            --notes "Download Tiho.apk and open it on the phone. Installed copies update themselves." \
             --latest
         env:
           GH_TOKEN: ${{ github.token }}

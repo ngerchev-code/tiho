@@ -19,6 +19,7 @@ import com.ngerchev.tiho.ui.ChatScreen
 import com.ngerchev.tiho.ui.LanguageScreen
 import com.ngerchev.tiho.ui.SettingsScreen
 import com.ngerchev.tiho.ui.TihoTheme
+import com.ngerchev.tiho.ui.UpdateDialog
 
 class MainActivity : ComponentActivity() {
 
@@ -71,4 +72,5 @@ private fun TihoApp(vm: ChatViewModel) {
         Screen.SETTINGS -> SettingsScreen(vm)
         Screen.ABOUT -> AboutScreen(vm)
     }
+    UpdateDialog(vm)
 }

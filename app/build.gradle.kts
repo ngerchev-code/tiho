@@ -13,6 +13,9 @@ val keystoreProps = Properties().apply {
 }
 val hasKeystore = keystoreProps.getProperty("storeFile") != null
 
+// Every automated build gets a higher number, so a newer build always installs over an older one.
+val buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
+
 android {
     namespace = "com.ngerchev.tiho"
     compileSdk = 35
@@ -22,8 +25,16 @@ android {
         applicationId = "com.ngerchev.tiho"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = buildNumber
+        versionName = "1.2.$buildNumber"
+    }
+
+    // "direct" = the APK people install from the link; it can update itself.
+    // "play"   = the Google Play edition: no internet permission, updates come from Play.
+    flavorDimensions += "dist"
+    productFlavors {
+        create("direct") { dimension = "dist" }
+        create("play") { dimension = "dist" }
     }
 
     signingConfigs {
