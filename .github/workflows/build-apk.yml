@@ -68,8 +68,9 @@ jobs:
       - name: Prepare signing key
         id: signing
         env:
-          SIGNING_KEYSTORE: ${{ secrets.SIGNING_KEYSTORE }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          # The intended names first; the others cover likely typos made when the secrets were added.
+          SIGNING_KEYSTORE: ${{ secrets.SIGNING_KEYSTORE || secrets.SIGHNING_KEYSTONE || secrets.SIGNING_KEYSTONE || secrets.SIGHNING_KEYSTORE }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD || secrets.SIGHNING_PASSWORD || secrets.SIGNING_PASSWORLD || secrets.SIGNING_PASWORD }}
         run: |
           if [ -n "$SIGNING_KEYSTORE" ] && [ -n "$SIGNING_PASSWORD" ]; then
             printf '%s' "$SIGNING_KEYSTORE" | tr -d ' \n\r' | base64 -d > release.jks
