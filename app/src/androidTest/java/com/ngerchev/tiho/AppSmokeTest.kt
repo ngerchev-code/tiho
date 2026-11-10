@@ -1,6 +1,8 @@
 package com.ngerchev.tiho
 
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -10,7 +12,9 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -34,6 +38,14 @@ class AppSmokeTest {
         rule.onNode(hasSetTextAction()).performTextInput(text)
         rule.onNodeWithContentDescription(s(R.string.cd_send)).performClick()
         rule.onNodeWithText(text).assertExists()
+    }
+
+    /** Taps a message bubble the way a person would: keyboard away, bubble in view. */
+    private fun tapBubble(text: String) {
+        Espresso.closeSoftKeyboard()
+        rule.waitForIdle()
+        rule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(text))
+        rule.onNodeWithText(text).assertIsDisplayed().performClick()
     }
 
     private fun openMenu(itemRes: Int) {
@@ -73,7 +85,7 @@ class AppSmokeTest {
     fun messageCanBeEditedAgain() {
         val text = unique("Edit me")
         sendTyped(text)
-        rule.onNodeWithText(text).performClick()
+        tapBubble(text)
         rule.onNodeWithText(s(R.string.msg_action_edit)).performClick()
         rule.onNode(hasSetTextAction()).assert(hasText(text))
         rule.onNodeWithContentDescription(s(R.string.cd_clear_draft)).performClick()
@@ -83,7 +95,7 @@ class AppSmokeTest {
     fun severalMessagesCanBeSelectedAndDeleted() {
         val text = unique("Select me")
         sendTyped(text)
-        rule.onNodeWithText(text).performClick()
+        tapBubble(text)
         rule.onNodeWithText(s(R.string.msg_action_select)).performClick()
         rule.onNodeWithText(rule.activity.getString(R.string.selection_count, 1)).assertExists()
         rule.onNodeWithContentDescription(s(R.string.msg_action_delete)).performClick()
