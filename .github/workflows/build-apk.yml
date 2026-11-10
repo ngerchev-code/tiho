@@ -34,6 +34,19 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Screen tests on an emulator
+        id: screens
+        continue-on-error: true
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: ./gradlew connectedDirectDebugAndroidTest -PallAbis --stacktrace
+
+      # The emulator download or start sometimes fails on the build machine: try once more.
+      - name: Screen tests on an emulator (second attempt)
+        if: steps.screens.outcome == 'failure'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
