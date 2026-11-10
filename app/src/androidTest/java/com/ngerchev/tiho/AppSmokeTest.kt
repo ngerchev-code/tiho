@@ -78,6 +78,10 @@ class AppSmokeTest {
     fun punctuationKeyWritesIntoTheDraft() {
         val text = unique("Draft")
         rule.onNode(hasSetTextAction()).performTextInput(text)
+        // The punctuation keys belong to the full panel, shown when the keyboard is closed.
+        Espresso.closeSoftKeyboard()
+        rule.waitForIdle()
+        rule.waitUntil(5_000) { rule.onAllNodesWithText("?").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithText("?").performClick()
         rule.onNode(hasSetTextAction()).assert(hasText("$text? "))
         rule.onNodeWithContentDescription(s(R.string.cd_clear_draft)).performClick()

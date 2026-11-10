@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -89,6 +90,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -895,6 +897,9 @@ private fun Composer(
     onOpenAppSettings: () -> Unit
 ) {
     val scale = LocalMessageScale.current
+    // While the keyboard is open the panel shrinks to the text field and Send, like in a
+    // messenger, so the conversation stays visible even on a small screen.
+    val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     var attachMenu by remember { mutableStateOf(false) }
     var templateMenu by remember { mutableStateOf(false) }
     Surface(
@@ -917,7 +922,7 @@ private fun Composer(
                 NoticeBanner(notice, onDismissNotice, onOpenAppSettings)
             }
 
-            StatusRow(speech, languageTag)
+            if (!imeVisible) StatusRow(speech, languageTag)
 
             if (speech.partial.isNotBlank()) {
                 Text(
@@ -983,7 +988,20 @@ private fun Composer(
                     shape = RoundedCornerShape(22.dp),
                     maxLines = 5
                 )
-                Box {
+                if (imeVisible) {
+                    FilledIconButton(
+                        onClick = onSend,
+                        enabled = draft.text.isNotBlank() || attachments.isNotEmpty(),
+                        modifier = Modifier
+                            .padding(start = 6.dp)
+                            .size(48.dp)
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ic_send),
+                            contentDescription = stringResource(R.string.cd_send)
+                        )
+                    }
+                } else Box {
                     IconButton(onClick = { templateMenu = true }, modifier = Modifier.size(48.dp)) {
                         Icon(
                             painterResource(R.drawable.ic_bolt),
@@ -1014,7 +1032,7 @@ private fun Composer(
                 }
             }
 
-            if (showPunctuationKeys) {
+            if (showPunctuationKeys && !imeVisible) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(".", ",", "?", "!", "\n").forEach { mark ->
                         Surface(
@@ -1036,7 +1054,7 @@ private fun Composer(
                 }
             }
 
-            Row(
+            if (!imeVisible) Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
