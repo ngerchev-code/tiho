@@ -37,6 +37,8 @@ class AppSmokeTest {
     private fun sendTyped(text: String) {
         rule.onNode(hasSetTextAction()).performTextInput(text)
         rule.onNodeWithContentDescription(s(R.string.cd_send)).performClick()
+        // The new message must scroll into view by itself.
+        rule.waitUntil(5_000) { rule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithText(text).assertExists()
     }
 

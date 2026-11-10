@@ -77,6 +77,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -190,9 +191,13 @@ fun ChatScreen(vm: ChatViewModel) {
     LaunchedEffect(Unit) {
         vm.events.collect { resId -> snackbar.showSnackbar(context.getString(resId)) }
     }
-    LaunchedEffect(messages.size) {
-        // Larger than the real item count on purpose: the list clamps it to the last item.
-        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size * 2)
+    // Always show the newest message: whenever the list grows, scroll to its last item.
+    LaunchedEffect(listState) {
+        var previous = 0
+        snapshotFlow { listState.layoutInfo.totalItemsCount }.collect { count ->
+            if (count > previous && count > 0) listState.animateScrollToItem(count - 1)
+            previous = count
+        }
     }
     DisposableEffect(micActive, settings.keepScreenOn) {
         view.keepScreenOn = micActive && settings.keepScreenOn
