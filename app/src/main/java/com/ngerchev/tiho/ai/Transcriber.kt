@@ -13,7 +13,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.ByteBuffer
 
-enum class TranscribeError { NO_AUDIO, TOO_LONG, BAD_KEY, FAILED }
+enum class TranscribeError { NO_AUDIO, TOO_LONG, BAD_KEY, LIMIT, FAILED }
 
 class TranscribeResult(val text: String?, val error: TranscribeError?)
 
@@ -27,7 +27,20 @@ class TranscribeResult(val text: String?, val error: TranscribeError?)
  */
 object Transcriber {
 
-    private const val ENDPOINT = "https://api.openai.com/v1/audio/transcriptions"
+    private const val OPENAI_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions"
+
+    // Groq runs the open Whisper model and has a free plan (no card needed). Its keys start
+    // with "gsk_"; the request format is the same as OpenAI's.
+    private const val GROQ_ENDPOINT = "https://api.groq.com/openai/v1/audio/transcriptions"
+    private val GROQ_MODELS = listOf("whisper-large-v3", "whisper-large-v3-turbo")
+
+    fun isGroqKey(key: String): Boolean = key.trim().startsWith("gsk_")
+
+    /** True when the text looks like a key of one of the two supported services. */
+    fun looksLikeKey(key: String): Boolean {
+        val k = key.trim()
+        return k.length >= 20 && (k.startsWith("gsk_") || k.startsWith("sk-"))
+    }
     private const val MAX_UPLOAD = 24L * 1024L * 1024L
 
     // The current model first; the older one as a fallback while it still exists.
@@ -83,8 +96,10 @@ object Transcriber {
 
             val language = if (languageTag.startsWith("bg")) "bg" else "en"
             var lastError = TranscribeError.FAILED
-            for (model in MODELS) {
-                val (code, body) = post(upload, apiKey, model, language)
+            val groq = isGroqKey(apiKey)
+            val endpoint = if (groq) GROQ_ENDPOINT else OPENAI_ENDPOINT
+            for (model in if (groq) GROQ_MODELS else MODELS) {
+                val (code, body) = post(endpoint, upload, apiKey, model, language)
                 when {
                     code == 200 -> {
                         val text = JSONObject(body).optString("text").trim()
@@ -97,6 +112,7 @@ object Transcriber {
 
                     code == 401 -> return TranscribeResult(null, TranscribeError.BAD_KEY)
                     code == 413 -> return TranscribeResult(null, TranscribeError.TOO_LONG)
+                    code == 429 -> return TranscribeResult(null, TranscribeError.LIMIT)
                     else -> lastError = TranscribeError.FAILED // e.g. unknown model: try the next
                 }
             }
@@ -155,9 +171,15 @@ object Transcriber {
         }
     }
 
-    private fun post(file: File, apiKey: String, model: String, language: String): Pair<Int, String> {
+    private fun post(
+        endpoint: String,
+        file: File,
+        apiKey: String,
+        model: String,
+        language: String
+    ): Pair<Int, String> {
         val boundary = "----tiho" + System.nanoTime()
-        val connection = URL(ENDPOINT).openConnection() as HttpURLConnection
+        val connection = URL(endpoint).openConnection() as HttpURLConnection
         try {
             connection.requestMethod = "POST"
             connection.connectTimeout = 15_000

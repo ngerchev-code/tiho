@@ -146,28 +146,30 @@
     <string name="templates_add">Добави</string>
     <string name="set_translate_title">Превеждай диктуваното</string>
     <string name="set_translate_text">Казаното на български става съобщение на английски и обратно. Преводът се прави на телефона; езиковият пакет се изтегля еднократно.</string>
-    <string name="sec_ai">OpenAI (по избор)</string>
+    <string name="sec_ai">Онлайн услуги (по избор)</string>
     <string name="set_ai_title">Пунктуация от OpenAI</string>
     <string name="set_ai_text">По-точна от вградените правила. Текстът на всяко диктувано съобщение се изпраща към OpenAI.</string>
-    <string name="set_ai_key">OpenAI API ключ</string>
+    <string name="set_ai_key">Ключ (Groq или OpenAI)</string>
     <string name="set_ai_model">Модел за пунктуацията (празно = стандартния)</string>
     <string name="sec_quick">Бързи бутони</string>
     <string name="set_quick_text">Приложения, които се показват като бутони с едно докосване под всяко съобщение.</string>
 
     <!-- Added in 1.5 -->
-    <string name="set_ai_intro">Нужно е за две неща: превръщане на аудио и видео файлове в текст и по-точна пунктуация. И двете ползват ваш собствен OpenAI API ключ (от platform.openai.com, отделен от абонамента за ChatGPT) и се таксуват по него.</string>
+    <string name="set_ai_intro">За превръщане на аудио и видео файлове в текст е нужен ключ: безплатен от Groq (console.groq.com) или платен от OpenAI. Записът се изпраща към съответната услуга. По-точната пунктуация по-долу работи само с ключ от OpenAI.</string>
     <string name="attach_transcribe">Аудио или видео в текст</string>
     <string name="msg_transcribing">Превръщам записа в текст… може да отнеме минута.</string>
-    <string name="msg_transcribe_needs_key">За превръщане на записи в текст е нужен OpenAI API ключ.</string>
+    <string name="msg_transcribe_needs_key">За превръщане на записи в текст е нужен ключ. Ключът от Groq е безплатен.</string>
     <string name="msg_transcribe_no_audio">От този файл не може да се прочете говор. Поддържат се mp3, m4a, wav, ogg, flac и видео със звук AAC (mp4, mov, 3gp).</string>
     <string name="msg_transcribe_too_long">Записът е твърде дълъг. Ограничението е около 24 MB звук, приблизително 25 минути.</string>
-    <string name="msg_transcribe_bad_key">OpenAI не прие този ключ. Въведете валиден OpenAI API ключ (започва с sk-).</string>
-    <string name="msg_transcribe_failed">Транскрипцията не успя. Проверете интернет връзката и баланса на акаунта си в OpenAI.</string>
+    <string name="msg_transcribe_bad_key">Услугата не прие този ключ. Въведете валиден ключ от Groq (gsk_…) или от OpenAI (sk-…).</string>
+    <string name="msg_transcribe_failed">Транскрипцията не успя. Проверете интернет връзката и опитайте пак.</string>
 
-    <string name="key_dialog_title">Нужен е ключ от OpenAI</string>
-    <string name="key_dialog_text">Телефонът не може сам да прочете говор от файл, затова записът се изпраща към OpenAI, за да стане на текст. За това е нужен ваш собствен OpenAI API ключ. Той е отделен от абонамента за ChatGPT и се плаща на минута запис.\n\nПоставете ключа тук еднократно. Пази се само на този телефон.</string>
-    <string name="key_dialog_get">Откъде да взема ключ?</string>
+    <string name="key_dialog_title">Нужен е ключ (има безплатен)</string>
+    <string name="key_dialog_text">Телефонът не може сам да прочете говор от файл, затова записът се изпраща към онлайн услуга, за да стане на текст.\n\nБезплатно: ключ от Groq. Отворете console.groq.com, влезте с Google акаунт, създайте API ключ и го поставете тук. Не се иска карта; има дневен лимит.\n\nПлатено: става и с ключ от OpenAI.\n\nКлючът се пази само на този телефон.</string>
+    <string name="key_dialog_get">Вземи безплатен ключ от Groq</string>
     <string name="key_dialog_save">Запази и избери запис</string>
 
-    <string name="key_dialog_hint">Истинският ключ започва с sk- и е дълъг. Не е паролата ви за ChatGPT.</string>
+    <string name="key_dialog_hint">Ключът от Groq започва с gsk_, а от OpenAI с sk-</string>
+
+    <string name="msg_transcribe_limit">Безплатният лимит е изчерпан за момента. Опитайте малко по-късно.</string>
 </resources>

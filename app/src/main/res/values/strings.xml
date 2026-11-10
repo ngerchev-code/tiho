@@ -151,28 +151,30 @@
     <string name="templates_add">Add</string>
     <string name="set_translate_title">Translate what I dictate</string>
     <string name="set_translate_text">Bulgarian speech becomes an English message and the other way round. Translated on the phone; the language pack is downloaded once.</string>
-    <string name="sec_ai">OpenAI (optional)</string>
+    <string name="sec_ai">Online services (optional)</string>
     <string name="set_ai_title">Punctuation by OpenAI</string>
     <string name="set_ai_text">More accurate than the built-in rules. The text of each dictated message is sent to OpenAI.</string>
-    <string name="set_ai_key">OpenAI API key</string>
+    <string name="set_ai_key">Key (Groq or OpenAI)</string>
     <string name="set_ai_model">Punctuation model (leave empty for the default)</string>
     <string name="sec_quick">Quick buttons</string>
     <string name="set_quick_text">Apps shown as one-tap buttons under every message.</string>
 
     <!-- Added in 1.5 -->
-    <string name="set_ai_intro">Needed for two things: turning audio and video files into text, and more accurate punctuation. Both use your own OpenAI API key (platform.openai.com, separate from a ChatGPT subscription) and are billed to it.</string>
+    <string name="set_ai_intro">Turning audio and video files into text needs a key: a free Groq key (console.groq.com) or a paid OpenAI key. The recording is sent to that service. The more accurate punctuation below works only with an OpenAI key.</string>
     <string name="attach_transcribe">Audio or video to text</string>
     <string name="msg_transcribing">Turning the recording into text… this can take a minute.</string>
-    <string name="msg_transcribe_needs_key">An OpenAI API key is needed to turn recordings into text.</string>
+    <string name="msg_transcribe_needs_key">A key is needed to turn recordings into text. A Groq key is free.</string>
     <string name="msg_transcribe_no_audio">No speech could be read from this file. Supported: mp3, m4a, wav, ogg, flac and video with AAC sound (mp4, mov, 3gp).</string>
     <string name="msg_transcribe_too_long">The recording is too long. The limit is about 24 MB of sound, roughly 25 minutes.</string>
-    <string name="msg_transcribe_bad_key">OpenAI did not accept this key. Enter a valid OpenAI API key (it starts with sk-).</string>
-    <string name="msg_transcribe_failed">The transcription did not succeed. Check the internet connection and the balance of your OpenAI account.</string>
+    <string name="msg_transcribe_bad_key">The service did not accept this key. Enter a valid Groq key (gsk_…) or OpenAI key (sk-…).</string>
+    <string name="msg_transcribe_failed">The transcription did not succeed. Check the internet connection and try again.</string>
 
-    <string name="key_dialog_title">An OpenAI key is needed</string>
-    <string name="key_dialog_text">The phone cannot read speech from a file by itself, so the recording is sent to OpenAI to be turned into text. For that you need your own OpenAI API key. It is separate from a ChatGPT subscription and is paid per minute of recording.\n\nPaste the key here once. It is stored only on this phone.</string>
-    <string name="key_dialog_get">Where do I get a key?</string>
+    <string name="key_dialog_title">A key is needed (there is a free one)</string>
+    <string name="key_dialog_text">The phone cannot read speech from a file by itself, so the recording is sent to an online service to be turned into text.\n\nFree: a Groq key. Open console.groq.com, sign in with a Google account, create an API key and paste it here. No card is needed; there is a daily limit.\n\nPaid: an OpenAI key also works.\n\nThe key is stored only on this phone.</string>
+    <string name="key_dialog_get">Get a free Groq key</string>
     <string name="key_dialog_save">Save and choose a recording</string>
 
-    <string name="key_dialog_hint">A real key starts with sk- and is long. It is not your ChatGPT password.</string>
+    <string name="key_dialog_hint">A Groq key starts with gsk_ and an OpenAI key with sk-</string>
+
+    <string name="msg_transcribe_limit">The free limit is used up for now. Try again a little later.</string>
 </resources>

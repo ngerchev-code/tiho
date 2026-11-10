@@ -106,6 +106,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ngerchev.tiho.ChatViewModel
 import com.ngerchev.tiho.R
+import com.ngerchev.tiho.ai.Transcriber
 import com.ngerchev.tiho.Screen
 import com.ngerchev.tiho.data.Attachment
 import com.ngerchev.tiho.data.FileKind
@@ -452,7 +453,7 @@ fun ChatScreen(vm: ChatViewModel) {
     }
 
     if (askKey) {
-        val looksValid = keyInput.startsWith("sk-") && keyInput.length >= 20
+        val looksValid = Transcriber.looksLikeKey(keyInput)
         AlertDialog(
             onDismissRequest = { askKey = false },
             title = { Text(stringResource(R.string.key_dialog_title)) },
@@ -473,7 +474,7 @@ fun ChatScreen(vm: ChatViewModel) {
                         modifier = Modifier.fillMaxWidth()
                     )
                     TextButton(
-                        onClick = { openLink(context, "https://platform.openai.com/api-keys") },
+                        onClick = { openLink(context, "https://console.groq.com/keys") },
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(stringResource(R.string.key_dialog_get))

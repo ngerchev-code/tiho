@@ -176,7 +176,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
      */
     private fun improve(message: Message) {
         val s = settings.value
-        val useAi = Updater.ENABLED && s.aiPunctuation && s.aiKey.isNotBlank()
+        val useAi = Updater.ENABLED && s.aiPunctuation && s.aiKey.isNotBlank() &&
+            !Transcriber.isGroqKey(s.aiKey)
         val useTranslation = Translator.ENABLED && s.autoTranslate
         if (!useAi && !useTranslation) return
         viewModelScope.launch {
@@ -260,6 +261,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                         TranscribeError.NO_AUDIO -> R.string.msg_transcribe_no_audio
                         TranscribeError.TOO_LONG -> R.string.msg_transcribe_too_long
                         TranscribeError.BAD_KEY -> R.string.msg_transcribe_bad_key
+                        TranscribeError.LIMIT -> R.string.msg_transcribe_limit
                         else -> R.string.msg_transcribe_failed
                     }
                 )
