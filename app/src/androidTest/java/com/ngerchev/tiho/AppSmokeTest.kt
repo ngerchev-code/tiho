@@ -46,7 +46,11 @@ class AppSmokeTest {
     private fun tapBubble(text: String) {
         Espresso.closeSoftKeyboard()
         rule.waitForIdle()
-        rule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(text))
+        // A short conversation fits on the screen and is not scrollable at all.
+        val scrollable = rule.onAllNodes(hasScrollToNodeAction())
+        if (scrollable.fetchSemanticsNodes().isNotEmpty()) {
+            scrollable.onFirst().performScrollToNode(hasText(text))
+        }
         rule.onNodeWithText(text).assertIsDisplayed().performClick()
     }
 
