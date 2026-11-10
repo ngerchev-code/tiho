@@ -442,7 +442,17 @@ fun ChatScreen(vm: ChatViewModel) {
         }
     }
 
+    // OpenAI refused the saved key: ask for a correct one straight away.
+    LaunchedEffect(vm.keyRejected) {
+        if (vm.keyRejected) {
+            vm.keyRejected = false
+            keyInput = ""
+            askKey = true
+        }
+    }
+
     if (askKey) {
+        val looksValid = keyInput.startsWith("sk-") && keyInput.length >= 20
         AlertDialog(
             onDismissRequest = { askKey = false },
             title = { Text(stringResource(R.string.key_dialog_title)) },
@@ -458,6 +468,8 @@ fun ChatScreen(vm: ChatViewModel) {
                         onValueChange = { keyInput = it.trim() },
                         label = { Text(stringResource(R.string.set_ai_key)) },
                         singleLine = true,
+                        isError = keyInput.isNotBlank() && !looksValid,
+                        supportingText = { Text(stringResource(R.string.key_dialog_hint)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     TextButton(
@@ -470,7 +482,7 @@ fun ChatScreen(vm: ChatViewModel) {
             },
             confirmButton = {
                 TextButton(
-                    enabled = keyInput.isNotBlank(),
+                    enabled = looksValid,
                     onClick = {
                         val key = keyInput
                         vm.updateSettings { it.copy(aiKey = key) }

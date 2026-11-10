@@ -63,6 +63,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     var importing by mutableStateOf(false)
         private set
 
+    /** Set when OpenAI refused the saved key, so the screen can ask for a correct one. */
+    var keyRejected by mutableStateOf(false)
+
     /** True while a recording is being turned into text. */
     var transcribing by mutableStateOf(false)
         private set
@@ -251,6 +254,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             if (text != null) {
                 messageStore.add(text, emptyList())
             } else {
+                if (result.error == TranscribeError.BAD_KEY) keyRejected = true
                 notify(
                     when (result.error) {
                         TranscribeError.NO_AUDIO -> R.string.msg_transcribe_no_audio
