@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Only in the self-updating edition: used solely to check for and download a new version. -->
+    <!-- Only in the edition installed from the link: used solely to ask whether a newer
+         version exists. The app never downloads or installs anything by itself. -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
 </manifest>

@@ -121,15 +121,9 @@
     <!-- Added in 1.2 -->
     <string name="privacy_network">• This app has no internet permission, no account, no ads and no analytics.</string>
     <string name="update_title">A new version is available</string>
-    <string name="update_text">Version %1$s is ready to download. Your messages and settings are kept.</string>
-    <string name="update_now">Update</string>
+    <string name="update_text">Version %1$s is ready. Press Download, open the downloaded file and confirm. Your messages and settings are kept.</string>
+    <string name="update_now">Download</string>
     <string name="update_later">Later</string>
-    <string name="update_downloading">Downloading the new version…</string>
-    <string name="update_ready_text">Downloaded. Press Install and confirm on the next screen.</string>
-    <string name="update_permission_text">Android needs your permission once: allow Tiho to install updates on the screen that opens, then come back and press Install.</string>
-    <string name="update_install">Install</string>
-    <string name="update_failed">The download did not succeed. Check the internet connection and try again.</string>
-    <string name="update_retry">Try again</string>
     <string name="about_check_update">Check for updates</string>
     <string name="msg_up_to_date">You have the latest version</string>
     <string name="msg_update_check_failed">Could not check for updates. Check the internet connection.</string>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- The self-updating edition does use the internet, for one purpose only. -->
-    <string name="privacy_network">• No account, no ads, no analytics. The app uses the internet for one thing only: to check GitHub for a new version of itself and download it. Your voice, messages and files are never sent anywhere by the app.</string>
+    <string name="privacy_network">• No account, no ads, no analytics. The app uses the internet for one thing only: to ask GitHub whether a newer version of itself exists. Your voice, messages and files are never sent anywhere by the app.</string>
 </resources>

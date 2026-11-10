@@ -89,7 +89,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     /** Looks for a newer build. Automatic checks are silent; a manual one reports the result. */
     fun checkForUpdate(manual: Boolean) {
         if (!Updater.ENABLED) return
-        if (updateState is UpdateState.Downloading || updateState is UpdateState.Ready) return
         lastUpdateCheck = System.currentTimeMillis()
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
@@ -104,30 +103,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun startUpdate() {
-        if (updateState is UpdateState.Downloading) return
-        updateState = UpdateState.Downloading(0f)
-        viewModelScope.launch {
-            var lastShown = 0f
-            val file = withContext(Dispatchers.IO) {
-                Updater.download(getApplication<Application>()) { progress ->
-                    // Report in steps of 2% to keep the UI calm.
-                    if (progress - lastShown >= 0.02f || progress >= 1f) {
-                        lastShown = progress
-                        viewModelScope.launch {
-                            if (updateState is UpdateState.Downloading) {
-                                updateState = UpdateState.Downloading(progress)
-                            }
-                        }
-                    }
-                }
-            }
-            updateState = if (file != null) UpdateState.Ready(file) else UpdateState.Failed
-        }
-    }
-
     fun dismissUpdate() {
-        if (updateState !is UpdateState.Downloading) updateState = UpdateState.None
+        updateState = UpdateState.None
     }
 
     // ---- navigation ----

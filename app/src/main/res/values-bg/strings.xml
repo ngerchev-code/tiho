@@ -116,15 +116,9 @@
     <!-- Added in 1.2 -->
     <string name="privacy_network">• Приложението няма разрешение за интернет, няма акаунт, реклами и аналитика.</string>
     <string name="update_title">Налична е нова версия</string>
-    <string name="update_text">Версия %1$s е готова за изтегляне. Съобщенията и настройките ви се запазват.</string>
-    <string name="update_now">Обнови</string>
+    <string name="update_text">Версия %1$s е готова. Натиснете „Изтегли“, отворете сваления файл и потвърдете. Съобщенията и настройките ви се запазват.</string>
+    <string name="update_now">Изтегли</string>
     <string name="update_later">По-късно</string>
-    <string name="update_downloading">Изтегляне на новата версия…</string>
-    <string name="update_ready_text">Изтеглено. Натиснете „Инсталирай“ и потвърдете на следващия екран.</string>
-    <string name="update_permission_text">Android иска разрешение еднократно: на екрана, който се отваря, разрешете на Тихо да инсталира обновления, върнете се и натиснете „Инсталирай“.</string>
-    <string name="update_install">Инсталирай</string>
-    <string name="update_failed">Изтеглянето не успя. Проверете интернет връзката и опитайте пак.</string>
-    <string name="update_retry">Опитай пак</string>
     <string name="about_check_update">Провери за обновление</string>
     <string name="msg_up_to_date">Имате последната версия</string>
     <string name="msg_update_check_failed">Проверката за обновление не успя. Проверете интернет връзката.</string>
