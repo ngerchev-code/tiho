@@ -17,13 +17,13 @@
 - Когато се използва разпознаване на устройството, звукът не напуска телефона.
 - Когато се използва онлайн разпознаване, услугата за реч изпраща звука към сървърите на своя доставчик за транскрипция. Тази обработка се извършва от доставчика на услугата по неговата политика за поверителност, а не от Тихо.
 
-**Текст на съобщенията.** Разпознатият и въведеният текст се пази само на вашето устройство, в личното хранилище на приложението, за най-много 24 часа, след което се изтрива автоматично. Можете да изтриете всичко веднага от „Изчисти разговора“ или да изключите пазенето от настройките. Текстът не се включва в резервни копия на Android.
+**Текст и прикачени файлове.** Разпознатият и въведеният текст, както и копия на файловете, които сами прикачите (документи и снимки), се пазят само на вашето устройство, в личното хранилище на приложението, за избрания от вас срок (по подразбиране 24 часа, най-много 7 дни), след което се изтриват автоматично. Можете да изтриете всичко веднага от „Изчисти разговора“. Тези данни не се включват в резервни копия на Android. Приложението няма достъп до останалите ви файлове — вижда само тези, които изберете.
 
-**Настройки.** Избраният език и три превключвателя се пазят локално на устройството.
+**Настройки.** Избраните език, изглед и превключватели се пазят локално на устройството.
 
 ## Споделяне
 
-Тихо не изпраща данни към разработчика или към трети страни. Когато вие изберете „Сподели в ChatGPT“, „Сподели чрез…“ или копирате текст, той се предава на избраното от вас приложение и оттам се прилагат неговите условия.
+Тихо не изпраща данни към разработчика или към трети страни. Когато вие изберете „Изпрати до…“, „Към ChatGPT“ или копирате текст, текстът и прикачените файлове се предават на избраното от вас приложение и оттам се прилагат неговите условия.
 
 ## Разрешения
 
@@ -47,9 +47,9 @@ Tiho converts speech to text on your phone. It collects no personal data, has no
 
 **Voice.** The microphone is used only while you dictate. Audio is never recorded or stored by the app; it is passed directly to the speech recognition service installed on your device (usually provided by Google), which returns text. With on-device recognition the audio stays on the phone. With online recognition that service sends the audio to its provider's servers for transcription under the provider's own privacy policy.
 
-**Message text.** Text is stored only on your device for at most 24 hours and then deleted automatically. You can delete it at any time or turn storage off. It is excluded from Android backups.
+**Message text and attached files.** Text and copies of the files you attach yourself are stored only on your device for the period you choose (24 hours by default, 7 days at most) and then deleted automatically. You can delete them at any time. They are excluded from Android backups. The app can see only the files you pick.
 
-**Sharing.** Nothing is sent to the developer or to third parties. Text leaves the app only when you choose to share or copy it.
+**Sharing.** Nothing is sent to the developer or to third parties. Text and files leave the app only when you choose to send or copy them.
 
 **Permissions.** `RECORD_AUDIO` only.
 
