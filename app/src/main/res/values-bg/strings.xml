@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Тихо</string>
+
+    <string name="empty_title">Натиснете микрофона и говорете</string>
+    <string name="empty_subtitle">Думите ви се появяват като текст. Не се записва звук.</string>
+    <string name="status_ready">Готово</string>
+    <string name="status_starting">Стартиране…</string>
+    <string name="status_listening">Слушам</string>
+    <string name="status_paused">Пауза · натиснете микрофона, за да продължите</string>
+    <string name="engine_on_device">на устройството</string>
+    <string name="engine_online">услуга за реч</string>
+    <string name="draft_hint">Говорете или напишете съобщение</string>
+
+    <string name="cd_mic_start">Започни диктовка</string>
+    <string name="cd_mic_pause">Пауза на диктовката</string>
+    <string name="cd_stop">Спри диктовката</string>
+    <string name="cd_clear_draft">Изчисти черновата</string>
+    <string name="cd_send">Изпрати</string>
+    <string name="cd_copy">Копирай съобщението</string>
+    <string name="cd_share_chatgpt">Сподели в ChatGPT</string>
+    <string name="cd_delete">Изтрий съобщението</string>
+    <string name="cd_menu">Меню</string>
+    <string name="cd_back">Назад</string>
+    <string name="cd_dismiss">Затвори</string>
+    <string name="cd_switch_language">Смени езика за разпознаване</string>
+
+    <string name="menu_copy_all">Копирай разговора</string>
+    <string name="menu_chatgpt_all">Сподели разговора в ChatGPT</string>
+    <string name="menu_share_all">Сподели чрез…</string>
+    <string name="menu_clear">Изчисти разговора</string>
+    <string name="menu_language">Език</string>
+    <string name="menu_settings">Поверителност и настройки</string>
+    <string name="menu_about">За приложението</string>
+
+    <string name="clear_title">Изчистване на разговора?</string>
+    <string name="clear_text">Всички съобщения ще бъдат изтрити от този телефон. Действието е необратимо.</string>
+    <string name="action_clear">Изчисти</string>
+    <string name="action_cancel">Отказ</string>
+    <string name="action_open_settings">Към настройките</string>
+
+    <string name="msg_copied">Копирано</string>
+    <string name="msg_chatgpt_web">Приложението ChatGPT не е намерено. Отворено е в браузъра; текстът е и копиран.</string>
+    <string name="msg_chatgpt_failed">ChatGPT не можа да се отвори. Текстът е копиран, поставете го там.</string>
+    <string name="msg_nothing_to_share">Още няма съобщения</string>
+
+    <string name="notice_no_permission">За диктовка е нужен достъп до микрофона. Разрешете го в настройките на приложението.</string>
+    <string name="notice_unavailable">На този телефон няма услуга за разпознаване на реч. Инсталирайте или включете приложението Google или „Speech Recognition &amp; Synthesis“.</string>
+    <string name="notice_network">Няма връзка с услугата за реч. Проверете интернета или инсталирайте офлайн езиковия пакет.</string>
+    <string name="notice_audio">Микрофонът е зает или недостъпен. Опитайте отново.</string>
+    <string name="notice_busy">Услугата за реч е заета. Опитайте след малко.</string>
+    <string name="notice_language">Този език не е наличен за разпознаване на този телефон.</string>
+    <string name="notice_silence">Пауза след тишина, за да се пести батерия.</string>
+    <string name="notice_phone_call">Пауза заради телефонно обаждане.</string>
+    <string name="notice_fell_back">Разпознаването на устройството не е налично за този език. Използва се онлайн услугата за реч.</string>
+    <string name="notice_generic">Разпознаването спря неочаквано. Натиснете микрофона, за да опитате отново.</string>
+
+    <string name="lang_bg">Български</string>
+    <string name="lang_en">English</string>
+    <string name="language_title">Език за разпознаване</string>
+    <string name="language_note">Това е езикът, на който говорите, а не езикът на менютата. За разпознаване без интернет инсталирайте офлайн езиковия пакет от настройките за реч на телефона (приложение Google → Настройки → Глас → Офлайн разпознаване на говор).</string>
+
+    <string name="settings_title">Поверителност и настройки</string>
+    <string name="set_on_device_title">Предпочитай разпознаване на устройството</string>
+    <string name="set_on_device_text">Речта се обработва на телефона, когато езиковият пакет е инсталиран. Иначе се използва онлайн услугата за реч.</string>
+    <string name="set_keep_title">Пази съобщенията 24 часа</string>
+    <string name="set_keep_text">Включено: текстът се пази само на този телефон и се изтрива автоматично след 24 часа. Изключено: съобщенията са само в паметта и изчезват при затваряне на приложението.</string>
+    <string name="set_punct_title">Изговорена пунктуация</string>
+    <string name="set_punct_text">Кажете „запетая“, „точка“, „въпросителен знак“ или „нов ред“, за да ги вмъкнете.</string>
+    <string name="privacy_heading">Как се обработват данните ви</string>
+    <string name="privacy_body">• Звукът никога не се записва във файл. Потокът от микрофона отива директно към услугата за разпознаване на реч на телефона и обратно се връща само текстът.\n\n• Приложението няма разрешение за интернет, няма акаунт, реклами и аналитика.\n\n• Съобщенията остават само на този телефон и се изтриват автоматично след 24 часа или веднага, когато изчистите разговора.\n\n• Разпознаването се извършва от услугата за реч, инсталирана на телефона (обикновено Google). При разпознаване на устройството звукът не напуска телефона. При онлайн услугата звукът се изпраща към този доставчик за транскрипция според неговата политика за поверителност.\n\n• Когато споделите текст в ChatGPT или друго приложение, текстът се предава на избраното от вас приложение.</string>
+
+    <string name="about_title">За приложението</string>
+    <string name="about_version">Версия %1$s</string>
+    <string name="about_body">„Тихо“ превръща казаното в четими текстови съобщения за моменти, когато пускането или записването на звук не е уместно: срещи, офис, градски транспорт.\n\nГоворете, проверете текста, изпратете. Копирайте го или го подайте към ChatGPT с едно докосване.</string>
+</resources>

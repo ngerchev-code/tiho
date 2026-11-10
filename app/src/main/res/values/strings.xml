@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tiho</string>
+
+    <!-- Chat screen -->
+    <string name="empty_title">Tap the microphone and speak</string>
+    <string name="empty_subtitle">Your words appear as text. No audio is saved.</string>
+    <string name="status_ready">Ready</string>
+    <string name="status_starting">Starting…</string>
+    <string name="status_listening">Listening</string>
+    <string name="status_paused">Paused · tap the microphone to continue</string>
+    <string name="engine_on_device">on-device</string>
+    <string name="engine_online">speech service</string>
+    <string name="draft_hint">Speak or type a message</string>
+
+    <string name="cd_mic_start">Start dictation</string>
+    <string name="cd_mic_pause">Pause dictation</string>
+    <string name="cd_stop">Stop dictation</string>
+    <string name="cd_clear_draft">Clear draft</string>
+    <string name="cd_send">Send</string>
+    <string name="cd_copy">Copy message</string>
+    <string name="cd_share_chatgpt">Share to ChatGPT</string>
+    <string name="cd_delete">Delete message</string>
+    <string name="cd_menu">Menu</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_dismiss">Dismiss</string>
+    <string name="cd_switch_language">Switch recognition language</string>
+
+    <string name="menu_copy_all">Copy conversation</string>
+    <string name="menu_chatgpt_all">Share conversation to ChatGPT</string>
+    <string name="menu_share_all">Share via…</string>
+    <string name="menu_clear">Clear conversation</string>
+    <string name="menu_language">Language</string>
+    <string name="menu_settings">Privacy &amp; settings</string>
+    <string name="menu_about">About</string>
+
+    <string name="clear_title">Clear conversation?</string>
+    <string name="clear_text">All messages will be deleted from this phone. This cannot be undone.</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_open_settings">Open settings</string>
+
+    <string name="msg_copied">Copied</string>
+    <string name="msg_chatgpt_web">ChatGPT app not found. Opened in the browser; the text is also copied.</string>
+    <string name="msg_chatgpt_failed">Could not open ChatGPT. The text is copied, paste it there.</string>
+    <string name="msg_nothing_to_share">No messages yet</string>
+
+    <!-- Speech notices -->
+    <string name="notice_no_permission">Microphone access is needed for dictation. Allow it in the app settings.</string>
+    <string name="notice_unavailable">No speech recognition service is available on this phone. Install or enable the Google app or “Speech Recognition &amp; Synthesis”.</string>
+    <string name="notice_network">No connection to the speech service. Check the internet or install the offline language pack.</string>
+    <string name="notice_audio">The microphone is busy or unavailable. Try again.</string>
+    <string name="notice_busy">The speech service is busy. Try again in a moment.</string>
+    <string name="notice_language">This language is not available for recognition on this phone.</string>
+    <string name="notice_silence">Paused after silence to save battery.</string>
+    <string name="notice_phone_call">Paused because of a phone call.</string>
+    <string name="notice_fell_back">On-device recognition is not available for this language. The online speech service is being used.</string>
+    <string name="notice_generic">Speech recognition stopped unexpectedly. Tap the microphone to try again.</string>
+
+    <!-- Language -->
+    <string name="lang_bg">Български</string>
+    <string name="lang_en">English</string>
+    <string name="language_title">Recognition language</string>
+    <string name="language_note">This is the language you speak, not the language of the menus. For recognition without internet, install the offline language pack in the speech settings of your phone (Google app → Settings → Voice → Offline speech recognition).</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Privacy &amp; settings</string>
+    <string name="set_on_device_title">Prefer on-device recognition</string>
+    <string name="set_on_device_text">Speech is processed on the phone when the language pack is installed. Otherwise the online speech service is used.</string>
+    <string name="set_keep_title">Keep messages for 24 hours</string>
+    <string name="set_keep_text">On: text is stored only on this phone and deleted automatically after 24 hours. Off: messages live only in memory and disappear when the app closes.</string>
+    <string name="set_punct_title">Spoken punctuation</string>
+    <string name="set_punct_text">Say “comma”, “full stop”, “question mark” or “new line” to insert them.</string>
+    <string name="privacy_heading">How your data is handled</string>
+    <string name="privacy_body">• Audio is never saved to a file. The microphone stream goes straight to the speech recognition service of your phone and only the resulting text comes back.\n\n• This app has no internet permission, no account, no ads and no analytics.\n\n• Messages stay only on this phone and are deleted automatically after 24 hours, or immediately when you clear the conversation.\n\n• Recognition is done by the speech service installed on your phone (usually Google). With on-device recognition the audio does not leave the phone. With the online service your audio is sent to that provider for transcription under its own privacy policy.\n\n• When you share text to ChatGPT or another app, the text is handed to the app you chose.</string>
+
+    <!-- About -->
+    <string name="about_title">About</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_body">Tiho turns what you say into readable text messages, for moments when playing or recording audio is not appropriate: meetings, the office, public transport.\n\nSpeak, check the text, send. Copy it or pass it to ChatGPT with one tap.</string>
+</resources>
