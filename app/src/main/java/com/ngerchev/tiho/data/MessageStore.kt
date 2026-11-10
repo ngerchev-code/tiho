@@ -56,6 +56,14 @@ class MessageStore(context: Context) {
         save()
     }
 
+    /** Removes a message but keeps its files, so it can go back into the draft for editing. */
+    fun take(id: Long): Message? {
+        val message = _messages.value.firstOrNull { it.id == id } ?: return null
+        _messages.value = _messages.value.filterNot { it.id == id }
+        save()
+        return message
+    }
+
     fun clear() {
         val removed = _messages.value
         _messages.value = emptyList()

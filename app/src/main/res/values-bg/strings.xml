@@ -96,8 +96,8 @@
     <string name="size_small">Малък</string>
     <string name="size_normal">Нормален</string>
     <string name="size_large">Голям</string>
-    <string name="set_auto_send_title">Изпращай всяка фраза автоматично</string>
-    <string name="set_auto_send_text">Всяка разпозната фраза веднага става съобщение, без да натискате „Изпрати“.</string>
+    <string name="set_auto_send_title">Всяка фраза в отделно облаче</string>
+    <string name="set_auto_send_text">След всяка пауза казаното става отделно съобщение, което се изпраща самостоятелно. Изключете, ако искате текстът да се събира в полето и да го редактирате преди това.</string>
     <string name="set_punct_keys_title">Бутони за пунктуация</string>
     <string name="set_punct_keys_text">Показва реда с бързи бутони . , ? ! и нов ред.</string>
     <string name="set_screen_on_title">Екранът да не гасне при диктовка</string>
@@ -128,4 +128,10 @@
     <string name="about_check_update">Провери за обновление</string>
     <string name="msg_up_to_date">Имате последната версия</string>
     <string name="msg_update_check_failed">Проверката за обновление не успя. Проверете интернет връзката.</string>
+
+    <!-- Added in 1.3 -->
+    <string name="set_auto_punct_title">Автоматична пунктуация</string>
+    <string name="set_auto_punct_text">Слага главна буква, точка или въпросителен знак и запетаи пред „че“, „но“, „защото“, „който“. Работи по прости правила и понякога греши.</string>
+    <string name="msg_action_edit">Редактирай</string>
+    <string name="msg_send_short">Изпрати</string>
 </resources>

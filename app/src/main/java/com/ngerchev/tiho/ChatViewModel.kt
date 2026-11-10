@@ -159,8 +159,25 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             raw
         }
-        setDraftText(TextFormatter.join(draft.text, text))
-        if (s.autoSend) send()
+        val phrase = if (s.autoPunctuation) {
+            TextFormatter.autoPunctuate(text, s.languageTag)
+        } else {
+            text
+        }
+        val combined = TextFormatter.join(draft.text, phrase)
+        if (!s.autoSend) {
+            setDraftText(combined)
+            return
+        }
+        // Separate bubbles: every sentence becomes its own message right away.
+        val sentences = TextFormatter.splitSentences(combined)
+        if (sentences.isEmpty()) return
+        val files = draftAttachments.toList()
+        draftAttachments.clear()
+        setDraftText("")
+        sentences.forEachIndexed { index, sentence ->
+            messageStore.add(sentence, if (index == 0) files else emptyList())
+        }
     }
 
     // ---- draft ----
@@ -233,6 +250,13 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun deleteMessage(id: Long) = messageStore.delete(id)
+
+    /** Puts a message back into the text field so it can be corrected and sent again. */
+    fun editMessage(id: Long) {
+        val message = messageStore.take(id) ?: return
+        draftAttachments.addAll(message.attachments)
+        setDraftText(TextFormatter.join(draft.text, message.text))
+    }
 
     fun clearConversation() {
         speech.stop()

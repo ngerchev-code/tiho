@@ -36,12 +36,14 @@ data class AppSettings(
     val languageTag: String,
     val preferOnDevice: Boolean = true,
     val spokenPunctuation: Boolean = true,
+    /** Capital letter, commas and closing mark are added automatically. */
+    val autoPunctuation: Boolean = true,
     val retention: Retention = Retention.HOURS_24,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val accent: Accent = Accent.GRAPHITE,
     val textSize: TextSize = TextSize.NORMAL,
-    /** Every recognized phrase becomes a message at once, without pressing Send. */
-    val autoSend: Boolean = false,
+    /** Every recognized phrase becomes its own message bubble, without pressing Send. */
+    val autoSend: Boolean = true,
     /** What happens right after pressing Send. */
     val afterSend: SendTarget = SendTarget.NONE,
     val keepScreenOn: Boolean = true,
@@ -68,6 +70,7 @@ class SettingsStore(context: Context) {
             .putString(KEY_ACCENT, next.accent.name)
             .putString(KEY_TEXT_SIZE, next.textSize.name)
             .putBoolean(KEY_AUTO_SEND, next.autoSend)
+            .putBoolean(KEY_AUTO_PUNCT, next.autoPunctuation)
             .putString(KEY_AFTER_SEND, next.afterSend.name)
             .putBoolean(KEY_SCREEN_ON, next.keepScreenOn)
             .putBoolean(KEY_PUNCT_KEYS, next.showPunctuationKeys)
@@ -90,7 +93,8 @@ class SettingsStore(context: Context) {
             themeMode = enumOr(prefs.getString(KEY_THEME, null), ThemeMode.SYSTEM),
             accent = enumOr(prefs.getString(KEY_ACCENT, null), Accent.GRAPHITE),
             textSize = enumOr(prefs.getString(KEY_TEXT_SIZE, null), TextSize.NORMAL),
-            autoSend = prefs.getBoolean(KEY_AUTO_SEND, false),
+            autoSend = prefs.getBoolean(KEY_AUTO_SEND, true),
+            autoPunctuation = prefs.getBoolean(KEY_AUTO_PUNCT, true),
             afterSend = enumOr(prefs.getString(KEY_AFTER_SEND, null), SendTarget.NONE),
             keepScreenOn = prefs.getBoolean(KEY_SCREEN_ON, true),
             showPunctuationKeys = prefs.getBoolean(KEY_PUNCT_KEYS, true),
@@ -112,7 +116,9 @@ class SettingsStore(context: Context) {
         private const val KEY_THEME = "theme"
         private const val KEY_ACCENT = "accent"
         private const val KEY_TEXT_SIZE = "text_size"
-        private const val KEY_AUTO_SEND = "auto_send"
+        // New key in 1.3: separate bubbles became the default.
+        private const val KEY_AUTO_SEND = "auto_bubbles"
+        private const val KEY_AUTO_PUNCT = "auto_punctuation"
         private const val KEY_AFTER_SEND = "after_send"
         private const val KEY_SCREEN_ON = "keep_screen_on"
         private const val KEY_PUNCT_KEYS = "punctuation_keys"

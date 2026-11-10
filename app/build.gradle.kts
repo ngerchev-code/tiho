@@ -26,7 +26,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = buildNumber
-        versionName = "1.2.$buildNumber"
+        versionName = "1.3.$buildNumber"
     }
 
     // "direct" = the APK people install from the link; it can update itself.

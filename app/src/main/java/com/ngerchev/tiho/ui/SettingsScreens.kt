@@ -183,16 +183,22 @@ fun SettingsScreen(vm: ChatViewModel) {
             onChange = { value -> vm.updateSettings { it.copy(preferOnDevice = value) } }
         )
         SwitchRow(
-            title = stringResource(R.string.set_punct_title),
-            text = stringResource(R.string.set_punct_text),
-            checked = settings.spokenPunctuation,
-            onChange = { value -> vm.updateSettings { it.copy(spokenPunctuation = value) } }
-        )
-        SwitchRow(
             title = stringResource(R.string.set_auto_send_title),
             text = stringResource(R.string.set_auto_send_text),
             checked = settings.autoSend,
             onChange = { value -> vm.updateSettings { it.copy(autoSend = value) } }
+        )
+        SwitchRow(
+            title = stringResource(R.string.set_auto_punct_title),
+            text = stringResource(R.string.set_auto_punct_text),
+            checked = settings.autoPunctuation,
+            onChange = { value -> vm.updateSettings { it.copy(autoPunctuation = value) } }
+        )
+        SwitchRow(
+            title = stringResource(R.string.set_punct_title),
+            text = stringResource(R.string.set_punct_text),
+            checked = settings.spokenPunctuation,
+            onChange = { value -> vm.updateSettings { it.copy(spokenPunctuation = value) } }
         )
         SwitchRow(
             title = stringResource(R.string.set_punct_keys_title),

@@ -332,6 +332,7 @@ fun ChatScreen(vm: ChatViewModel) {
                             onCopy = { copyText(message.text) },
                             onSendTo = { sendTo(SendTarget.SHARE_MENU, message.text, message.attachments) },
                             onChatGpt = { sendTo(SendTarget.CHATGPT, message.text, message.attachments) },
+                            onEdit = { vm.editMessage(message.id) },
                             onDelete = { vm.deleteMessage(message.id) },
                             onOpenFile = openFile
                         )
@@ -432,6 +433,7 @@ private fun MessageBubble(
     onCopy: () -> Unit,
     onSendTo: () -> Unit,
     onChatGpt: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     onOpenFile: (Attachment) -> Unit
 ) {
@@ -497,6 +499,11 @@ private fun MessageBubble(
                     )
                 }
                 DropdownMenuItem(
+                    text = { Text(stringResource(R.string.msg_action_edit)) },
+                    leadingIcon = { Icon(painterResource(R.drawable.ic_back), null) },
+                    onClick = { menuOpen = false; onEdit() }
+                )
+                DropdownMenuItem(
                     text = { Text(stringResource(R.string.msg_action_delete)) },
                     leadingIcon = { Icon(painterResource(R.drawable.ic_close), null) },
                     onClick = { menuOpen = false; onDelete() }
@@ -504,7 +511,7 @@ private fun MessageBubble(
             }
         }
         Row(
-            modifier = Modifier.padding(top = 2.dp),
+            modifier = Modifier.padding(top = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -512,15 +519,29 @@ private fun MessageBubble(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(Modifier.width(2.dp))
-            // The quickest way to get a message to another person.
-            IconButton(onClick = onSendTo, modifier = Modifier.size(36.dp)) {
-                Icon(
-                    painterResource(R.drawable.ic_forward),
-                    contentDescription = stringResource(R.string.msg_action_send),
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
+            Spacer(Modifier.width(8.dp))
+            // Every bubble is sent on its own: this hands just this message to another app.
+            Surface(
+                onClick = onSendTo,
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Row(
+                    modifier = Modifier.padding(start = 12.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.msg_send_short),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                    Spacer(Modifier.width(2.dp))
+                    Icon(
+                        painterResource(R.drawable.ic_forward),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }
