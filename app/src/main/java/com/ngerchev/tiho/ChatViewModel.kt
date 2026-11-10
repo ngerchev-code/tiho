@@ -11,6 +11,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ngerchev.tiho.ai.AiPunctuation
+import com.ngerchev.tiho.ai.TranscribeError
+import com.ngerchev.tiho.ai.Transcriber
 import com.ngerchev.tiho.data.AppSettings
 import com.ngerchev.tiho.data.Attachment
 import com.ngerchev.tiho.data.AttachmentStore
@@ -59,6 +61,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     val draftAttachments = mutableStateListOf<Attachment>()
 
     var importing by mutableStateOf(false)
+        private set
+
+    /** True while a recording is being turned into text. */
+    var transcribing by mutableStateOf(false)
         private set
 
     var screen by mutableStateOf(Screen.CHAT)
@@ -222,6 +228,40 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeTemplate(index: Int) {
         settingsStore.update { s -> s.copy(templates = s.templates.filterIndexed { i, _ -> i != index }) }
+    }
+
+    // ---- transcription of recordings ----
+
+    /** Turns an audio or video file into a text message, using the user's OpenAI key. */
+    fun transcribe(uri: Uri) {
+        if (transcribing) return
+        val s = settings.value
+        if (s.aiKey.isBlank()) {
+            notify(R.string.msg_transcribe_needs_key)
+            navigate(Screen.SETTINGS)
+            return
+        }
+        transcribing = true
+        notify(R.string.msg_transcribing)
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                Transcriber.transcribe(getApplication<Application>(), uri, s.aiKey, s.languageTag)
+            }
+            transcribing = false
+            val text = result.text
+            if (text != null) {
+                messageStore.add(text, emptyList())
+            } else {
+                notify(
+                    when (result.error) {
+                        TranscribeError.NO_AUDIO -> R.string.msg_transcribe_no_audio
+                        TranscribeError.TOO_LONG -> R.string.msg_transcribe_too_long
+                        TranscribeError.BAD_KEY -> R.string.msg_transcribe_bad_key
+                        else -> R.string.msg_transcribe_failed
+                    }
+                )
+            }
+        }
     }
 
     // ---- camera ----

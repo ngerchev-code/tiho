@@ -116,6 +116,7 @@ import com.ngerchev.tiho.speech.SpeechEngine
 import com.ngerchev.tiho.speech.SpeechNotice
 import com.ngerchev.tiho.speech.SpeechUiState
 import com.ngerchev.tiho.translate.Translator
+import com.ngerchev.tiho.update.Updater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -156,6 +157,11 @@ fun ChatScreen(vm: ChatViewModel) {
         if (uris.isNotEmpty()) vm.addAttachments(uris)
     }
 
+    val recordingPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) vm.transcribe(uri)
+    }
     // The phone's camera app takes the photo; this app needs no camera permission.
     val camera = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -345,10 +351,12 @@ fun ChatScreen(vm: ChatViewModel) {
                 showPunctuationKeys = settings.showPunctuationKeys,
                 draft = vm.draft,
                 attachments = vm.draftAttachments,
-                importing = vm.importing,
+                importing = vm.importing || vm.transcribing,
                 onDraftChange = vm::onDraftChange,
                 onAttach = { filePicker.launch(FileKind.PICKER_MIME_TYPES) },
                 onCamera = takePhoto,
+                canTranscribe = Updater.ENABLED,
+                onTranscribe = { recordingPicker.launch(arrayOf("audio/*", "video/*")) },
                 templates = settings.templates,
                 onTemplate = { vm.useTemplate(it) },
                 onEditTemplates = { vm.navigate(Screen.TEMPLATES) },
@@ -810,6 +818,8 @@ private fun Composer(
     onDraftChange: (TextFieldValue) -> Unit,
     onAttach: () -> Unit,
     onCamera: () -> Unit,
+    canTranscribe: Boolean,
+    onTranscribe: () -> Unit,
     templates: List<String>,
     onTemplate: (String) -> Unit,
     onEditTemplates: () -> Unit,
@@ -891,6 +901,12 @@ private fun Composer(
                             text = { Text(stringResource(R.string.attach_camera)) },
                             onClick = { attachMenu = false; onCamera() }
                         )
+                        if (canTranscribe) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.attach_transcribe)) },
+                                onClick = { attachMenu = false; onTranscribe() }
+                            )
+                        }
                     }
                 }
                 OutlinedTextField(

@@ -237,13 +237,19 @@ fun SettingsScreen(vm: ChatViewModel) {
         // ---- AI punctuation (optional, needs the internet edition) ----
         if (Updater.ENABLED) {
             SectionTitle(stringResource(R.string.sec_ai))
+            Text(
+                text = stringResource(R.string.set_ai_intro),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             SwitchRow(
                 title = stringResource(R.string.set_ai_title),
                 text = stringResource(R.string.set_ai_text),
                 checked = settings.aiPunctuation,
                 onChange = { value -> vm.updateSettings { it.copy(aiPunctuation = value) } }
             )
-            if (settings.aiPunctuation) {
+            Spacer(Modifier.height(4.dp))
+            run {
                 OutlinedTextField(
                     value = settings.aiKey,
                     onValueChange = { value -> vm.updateSettings { it.copy(aiKey = value.trim()) } },

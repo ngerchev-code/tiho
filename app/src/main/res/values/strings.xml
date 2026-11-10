@@ -151,11 +151,21 @@
     <string name="templates_add">Add</string>
     <string name="set_translate_title">Translate what I dictate</string>
     <string name="set_translate_text">Bulgarian speech becomes an English message and the other way round. Translated on the phone; the language pack is downloaded once.</string>
-    <string name="sec_ai">AI punctuation (optional)</string>
+    <string name="sec_ai">OpenAI (optional)</string>
     <string name="set_ai_title">Punctuation by OpenAI</string>
-    <string name="set_ai_text">More accurate than the built-in rules. Needs your own OpenAI API key and the internet; the text of each dictated message is sent to OpenAI and usage is billed to your key.</string>
+    <string name="set_ai_text">More accurate than the built-in rules. The text of each dictated message is sent to OpenAI.</string>
     <string name="set_ai_key">OpenAI API key</string>
-    <string name="set_ai_model">Model (leave empty for the default)</string>
+    <string name="set_ai_model">Punctuation model (leave empty for the default)</string>
     <string name="sec_quick">Quick buttons</string>
     <string name="set_quick_text">Apps shown as one-tap buttons under every message.</string>
+
+    <!-- Added in 1.5 -->
+    <string name="set_ai_intro">Needed for two things: turning audio and video files into text, and more accurate punctuation. Both use your own OpenAI API key (platform.openai.com, separate from a ChatGPT subscription) and are billed to it.</string>
+    <string name="attach_transcribe">Audio or video to text</string>
+    <string name="msg_transcribing">Turning the recording into text… this can take a minute.</string>
+    <string name="msg_transcribe_needs_key">Enter your OpenAI API key first, in the OpenAI section below.</string>
+    <string name="msg_transcribe_no_audio">No speech could be read from this file. Supported: mp3, m4a, wav, ogg, flac and video with AAC sound (mp4, mov, 3gp).</string>
+    <string name="msg_transcribe_too_long">The recording is too long. The limit is about 24 MB of sound, roughly 25 minutes.</string>
+    <string name="msg_transcribe_bad_key">OpenAI rejected the API key. Check it in the settings.</string>
+    <string name="msg_transcribe_failed">The transcription did not succeed. Check the internet connection and the balance of your OpenAI account.</string>
 </resources>
