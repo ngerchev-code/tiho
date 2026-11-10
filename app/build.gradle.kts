@@ -29,9 +29,14 @@ android {
         versionName = "1.5.$buildNumber"
 
         // Phones are ARM; leaving out the emulator (x86) builds halves the size of the APK.
-        ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        // (The automated tests run on an x86 emulator and pass -PallAbis to keep everything.)
+        if (!project.hasProperty("allAbis")) {
+            ndk {
+                abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+            }
         }
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // "direct" = the APK people install from the link; it can update itself.
@@ -90,4 +95,12 @@ dependencies {
     // On-device translation. Only in the "direct" edition: the library needs the internet
     // once, to download the language pack.
     "directImplementation"("com.google.mlkit:translate:17.0.3")
+
+    // Automated checks: text rules on the build machine, and the screens on an emulator.
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

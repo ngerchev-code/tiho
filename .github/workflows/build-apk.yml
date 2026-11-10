@@ -9,7 +9,50 @@ permissions:
   contents: write
 
 jobs:
+  # 1) Check the app before anything is published: text rules, then the real app on an emulator.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Text rule tests
+        run: |
+          chmod +x gradlew
+          ./gradlew testDirectDebugUnitTest --stacktrace
+
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Screen tests on an emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: ./gradlew connectedDirectDebugAndroidTest -PallAbis --stacktrace
+
+      - name: Keep the test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: app/build/reports
+          if-no-files-found: ignore
+
+  # 2) Only when the tests pass: build and publish.
   build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,7 +102,7 @@ jobs:
           if [ -f version.json ]; then FILES="Tiho.apk version.json"; fi
           gh release create "v1.5.${{ github.run_number }}" $FILES \
             --title "Tiho 1.5.${{ github.run_number }}" \
-            --notes "Download Tiho.apk and open it on the phone. Installed copies update themselves." \
+            --notes "Download Tiho.apk and open it on the phone." \
             --latest
         env:
           GH_TOKEN: ${{ github.token }}
