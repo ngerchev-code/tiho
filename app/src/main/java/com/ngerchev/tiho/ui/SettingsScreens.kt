@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ngerchev.tiho.ChatViewModel
 import com.ngerchev.tiho.R
-import com.ngerchev.tiho.ai.AiPunctuation
 import com.ngerchev.tiho.Screen
 import com.ngerchev.tiho.data.Accent
 import com.ngerchev.tiho.data.Retention
@@ -278,7 +277,6 @@ fun SettingsScreen(vm: ChatViewModel) {
                     value = settings.aiModel,
                     onValueChange = { value -> vm.updateSettings { it.copy(aiModel = value.trim()) } },
                     label = { Text(stringResource(R.string.set_ai_model)) },
-                    placeholder = { Text(AiPunctuation.DEFAULT_MODEL) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )

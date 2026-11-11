@@ -151,16 +151,16 @@
     <string name="templates_add">Add</string>
     <string name="set_translate_title">Translate what I dictate</string>
     <string name="set_translate_text">Bulgarian speech becomes an English message and the other way round. Translated on the phone; the language pack is downloaded once.</string>
-    <string name="sec_ai">Online services (optional)</string>
-    <string name="set_ai_title">Punctuation by OpenAI</string>
-    <string name="set_ai_text">More accurate than the built-in rules. The text of each dictated message is sent to OpenAI.</string>
+    <string name="sec_ai">AI services (optional, free with Groq)</string>
+    <string name="set_ai_title">AI punctuation</string>
+    <string name="set_ai_text">More accurate than the built-in rules. The text of each dictated message is sent to Groq or OpenAI (depending on the key) and comes back corrected a moment later.</string>
     <string name="set_ai_key">Key (Groq or OpenAI)</string>
-    <string name="set_ai_model">Punctuation model (leave empty for the default)</string>
+    <string name="set_ai_model">Model (leave empty: chosen automatically)</string>
     <string name="sec_quick">Quick buttons</string>
     <string name="set_quick_text">Apps shown as one-tap buttons under every message.</string>
 
     <!-- Added in 1.5 -->
-    <string name="set_ai_intro">Turning audio and video files into text needs a key: a free Groq key (console.groq.com) or a paid OpenAI key. The recording is sent to that service. The more accurate punctuation below works only with an OpenAI key.</string>
+    <string name="set_ai_intro">One key unlocks two things: turning audio and video files into text, and more accurate punctuation. A Groq key is free (console.groq.com, no card); an OpenAI key also works and is paid. The recording or text is sent to that service.</string>
     <string name="attach_transcribe">Audio or video to text</string>
     <string name="msg_transcribing">Turning the recording into text… this can take a minute.</string>
     <string name="msg_transcribe_needs_key">A key is needed to turn recordings into text. A Groq key is free.</string>

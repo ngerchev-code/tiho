@@ -176,8 +176,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
      */
     private fun improve(message: Message) {
         val s = settings.value
-        val useAi = Updater.ENABLED && s.aiPunctuation && s.aiKey.isNotBlank() &&
-            !Transcriber.isGroqKey(s.aiKey)
+        val useAi = Updater.ENABLED && s.aiPunctuation && s.aiKey.isNotBlank()
         val useTranslation = Translator.ENABLED && s.autoTranslate
         if (!useAi && !useTranslation) return
         viewModelScope.launch {

@@ -146,16 +146,16 @@
     <string name="templates_add">Добави</string>
     <string name="set_translate_title">Превеждай диктуваното</string>
     <string name="set_translate_text">Казаното на български става съобщение на английски и обратно. Преводът се прави на телефона; езиковият пакет се изтегля еднократно.</string>
-    <string name="sec_ai">Онлайн услуги (по избор)</string>
-    <string name="set_ai_title">Пунктуация от OpenAI</string>
-    <string name="set_ai_text">По-точна от вградените правила. Текстът на всяко диктувано съобщение се изпраща към OpenAI.</string>
+    <string name="sec_ai">AI услуги (по избор, безплатно с Groq)</string>
+    <string name="set_ai_title">AI пунктуация</string>
+    <string name="set_ai_text">По-точна от вградените правила. Текстът на всяко диктувано съобщение се изпраща към Groq или OpenAI (според ключа) и след миг се връща поправен.</string>
     <string name="set_ai_key">Ключ (Groq или OpenAI)</string>
-    <string name="set_ai_model">Модел за пунктуацията (празно = стандартния)</string>
+    <string name="set_ai_model">Модел (празно = избира се автоматично)</string>
     <string name="sec_quick">Бързи бутони</string>
     <string name="set_quick_text">Приложения, които се показват като бутони с едно докосване под всяко съобщение.</string>
 
     <!-- Added in 1.5 -->
-    <string name="set_ai_intro">За превръщане на аудио и видео файлове в текст е нужен ключ: безплатен от Groq (console.groq.com) или платен от OpenAI. Записът се изпраща към съответната услуга. По-точната пунктуация по-долу работи само с ключ от OpenAI.</string>
+    <string name="set_ai_intro">Един ключ отключва две неща: превръщане на аудио и видео файлове в текст и по-точна пунктуация. Ключът от Groq е безплатен (console.groq.com, без карта); става и платен ключ от OpenAI. Записът или текстът се изпраща към съответната услуга.</string>
     <string name="attach_transcribe">Аудио или видео в текст</string>
     <string name="msg_transcribing">Превръщам записа в текст… може да отнеме минута.</string>
     <string name="msg_transcribe_needs_key">За превръщане на записи в текст е нужен ключ. Ключът от Groq е безплатен.</string>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- The self-updating edition does use the internet, for one purpose only. -->
-    <string name="privacy_network">• No account, no ads, no analytics. The app uses the internet for one thing only: to ask GitHub whether a newer version of itself exists. It can also download a translation language pack once. Your voice, messages and files are not sent anywhere by the app, unless you use the optional online features with your own key: then the recording you choose to transcribe is sent to Groq or OpenAI, and with OpenAI punctuation the text of dictated messages is sent to OpenAI.</string>
+    <string name="privacy_network">• No account, no ads, no analytics. The app uses the internet for one thing only: to ask GitHub whether a newer version of itself exists. It can also download a translation language pack once. Your voice, messages and files are not sent anywhere by the app, unless you use the optional online features with your own key: then the recording you choose to transcribe is sent to Groq or OpenAI, and with AI punctuation the text of dictated messages is sent to the same service.</string>
 </resources>
