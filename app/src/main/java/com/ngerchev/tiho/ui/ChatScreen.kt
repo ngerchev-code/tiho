@@ -49,8 +49,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -147,6 +149,8 @@ fun ChatScreen(vm: ChatViewModel) {
     var pendingPhoto by remember { mutableStateOf<File?>(null) }
     // Asking for the OpenAI key right here, the first time a recording is to be transcribed.
     var askKey by remember { mutableStateOf(false) }
+    // When the key dialog was opened for proofreading, the message to check after saving.
+    var proofreadAfterKey by remember { mutableStateOf<Long?>(null) }
     var keyInput by remember { mutableStateOf("") }
 
     val micActive = speech.state == DictationState.LISTENING ||
@@ -213,7 +217,10 @@ fun ChatScreen(vm: ChatViewModel) {
     val onMic: () -> Unit = {
         buzz()
         if (micActive) {
-            vm.pauseDictation()
+            // Second press: stop, then the text gets its punctuation and becomes a message.
+            vm.stopDictation()
+        } else if (vm.processing) {
+            Unit
         } else if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
         ) {
@@ -363,6 +370,7 @@ fun ChatScreen(vm: ChatViewModel) {
                 draft = vm.draft,
                 attachments = vm.draftAttachments,
                 importing = vm.importing || vm.transcribing,
+                processing = vm.processing,
                 onDraftChange = vm::onDraftChange,
                 onAttach = { filePicker.launch(FileKind.PICKER_MIME_TYPES) },
                 onCamera = takePhoto,
@@ -380,7 +388,7 @@ fun ChatScreen(vm: ChatViewModel) {
                 onEditTemplates = { vm.navigate(Screen.TEMPLATES) },
                 onRemoveAttachment = { vm.removeDraftAttachment(it) },
                 onMic = onMic,
-                onStop = { vm.stopDictation() },
+                onStop = { vm.cancelDictation() },
                 onClearDraft = { vm.clearDraft() },
                 onSend = onSend,
                 onPunctuation = { vm.insertPunctuation(it) },
@@ -430,6 +438,8 @@ fun ChatScreen(vm: ChatViewModel) {
                             },
                             onQuick = { target -> sendTo(target, message.text, message.attachments) },
                             onTranslate = { vm.translateMessage(message.id) },
+                            canProofread = Updater.ENABLED,
+                            onProofread = { vm.proofreadMessage(message.id) },
                             onCopy = { copyText(message.text) },
                             onSendTo = { sendTo(SendTarget.SHARE_MENU, message.text, message.attachments) },
                             onChatGpt = { sendTo(SendTarget.CHATGPT, message.text, message.attachments) },
@@ -448,8 +458,27 @@ fun ChatScreen(vm: ChatViewModel) {
         if (vm.keyRejected) {
             vm.keyRejected = false
             keyInput = ""
+            proofreadAfterKey = null
             askKey = true
         }
+    }
+    // Proofreading was asked for without a key: ask for one, then continue with that message.
+    LaunchedEffect(vm.keyNeededForProofread) {
+        val id = vm.keyNeededForProofread
+        if (id != null) {
+            vm.keyNeededForProofread = null
+            keyInput = ""
+            proofreadAfterKey = id
+            askKey = true
+        }
+    }
+
+    vm.proofread?.let { suggestion ->
+        ProofreadDialog(
+            suggestion = suggestion,
+            onAccept = { vm.acceptProofread(it) },
+            onDismiss = { vm.dismissProofread() }
+        )
     }
 
     if (askKey) {
@@ -488,7 +517,13 @@ fun ChatScreen(vm: ChatViewModel) {
                         val key = keyInput
                         vm.updateSettings { it.copy(aiKey = key) }
                         askKey = false
-                        recordingPicker.launch(arrayOf("audio/*", "video/*"))
+                        val pending = proofreadAfterKey
+                        proofreadAfterKey = null
+                        if (pending != null) {
+                            vm.proofreadMessage(pending)
+                        } else {
+                            recordingPicker.launch(arrayOf("audio/*", "video/*"))
+                        }
                     }
                 ) {
                     Text(stringResource(R.string.key_dialog_save))
@@ -631,6 +666,8 @@ private fun MessageBubble(
     onStartSelect: () -> Unit,
     onQuick: (SendTarget) -> Unit,
     onTranslate: () -> Unit,
+    canProofread: Boolean,
+    onProofread: () -> Unit,
     onCopy: () -> Unit,
     onSendTo: () -> Unit,
     onChatGpt: () -> Unit,
@@ -706,6 +743,13 @@ private fun MessageBubble(
                     leadingIcon = { Icon(painterResource(R.drawable.ic_share), null) },
                     onClick = { menuOpen = false; onChatGpt() }
                 )
+                if (canProofread && message.text.isNotBlank()) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.msg_action_proofread)) },
+                        leadingIcon = { Icon(painterResource(R.drawable.ic_bolt), null) },
+                        onClick = { menuOpen = false; onProofread() }
+                    )
+                }
                 if (canTranslate && message.text.isNotBlank()) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.msg_action_translate)) },
@@ -892,6 +936,7 @@ private fun Composer(
     draft: TextFieldValue,
     attachments: List<Attachment>,
     importing: Boolean,
+    processing: Boolean,
     onDraftChange: (TextFieldValue) -> Unit,
     onAttach: () -> Unit,
     onCamera: () -> Unit,
@@ -935,7 +980,7 @@ private fun Composer(
                 NoticeBanner(notice, onDismissNotice, onOpenAppSettings)
             }
 
-            if (!imeVisible) StatusRow(speech, languageTag)
+            if (!imeVisible) StatusRow(speech, languageTag, processing)
 
             if (speech.partial.isNotBlank()) {
                 Text(
@@ -1080,16 +1125,19 @@ private fun Composer(
                     modifier = Modifier.size(56.dp)
                 ) {
                     Icon(
-                        painterResource(
-                            if (sessionOpen) R.drawable.ic_stop else R.drawable.ic_close
-                        ),
+                        painterResource(R.drawable.ic_close),
                         contentDescription = stringResource(
-                            if (sessionOpen) R.string.cd_stop else R.string.cd_clear_draft
+                            if (sessionOpen) R.string.cd_cancel_dictation else R.string.cd_clear_draft
                         )
                     )
                 }
 
-                MicButton(active = micActive, onClick = onMic)
+                MicButton(
+                    listening = micActive,
+                    speaking = speech.speaking,
+                    processing = processing,
+                    onClick = onMic
+                )
 
                 FilledIconButton(
                     onClick = onSend,
@@ -1137,17 +1185,27 @@ private fun DraftAttachmentChip(attachment: Attachment, onRemove: () -> Unit) {
 }
 
 @Composable
-private fun StatusRow(speech: SpeechUiState, languageTag: String) {
+private fun StatusRow(speech: SpeechUiState, languageTag: String, processing: Boolean) {
     val listening = speech.state == DictationState.LISTENING
+    val dotColor = when {
+        processing -> processingColor()
+        listening && speech.speaking -> speakingColor()
+        listening -> recordColor()
+        else -> MaterialTheme.colorScheme.outline
+    }
     val languageName = stringResource(
         if (languageTag == SettingsStore.LANG_BG) R.string.lang_bg else R.string.lang_en
     )
     val status = stringResource(
-        when (speech.state) {
+        when {
+            processing -> R.string.status_processing
+            listening && speech.speaking -> R.string.status_speaking
+            else -> when (speech.state) {
             DictationState.IDLE -> R.string.status_ready
             DictationState.STARTING -> R.string.status_starting
             DictationState.LISTENING -> R.string.status_listening
             DictationState.PAUSED -> R.string.status_paused
+            }
         }
     )
     val engine = when (speech.engine) {
@@ -1161,16 +1219,13 @@ private fun StatusRow(speech: SpeechUiState, languageTag: String) {
         Box(
             Modifier
                 .size(8.dp)
-                .background(
-                    if (listening) recordColor() else MaterialTheme.colorScheme.outline,
-                    CircleShape
-                )
+                .background(dotColor, CircleShape)
         )
         Spacer(Modifier.width(8.dp))
         Text(
             text = status,
             style = MaterialTheme.typography.labelLarge,
-            color = if (listening) recordColor() else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (listening || processing) dotColor else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1240,46 +1295,119 @@ private fun NoticeBanner(
     }
 }
 
+/**
+ * The big microphone. Red: listening, waiting for you to speak. Green: you are speaking.
+ * Blue: you pressed it again and the text is being finished. It stays on until the second press.
+ */
 @Composable
-private fun MicButton(active: Boolean, onClick: () -> Unit) {
-    val record = recordColor()
+private fun MicButton(listening: Boolean, speaking: Boolean, processing: Boolean, onClick: () -> Unit) {
+    val color = when {
+        processing -> processingColor()
+        listening && speaking -> speakingColor()
+        listening -> recordColor()
+        else -> MaterialTheme.colorScheme.primary
+    }
     Box(modifier = Modifier.size(100.dp), contentAlignment = Alignment.Center) {
-        if (active) {
-            // The one animation in the app: a soft pulse while the microphone is live.
+        if (listening || processing) {
+            // A soft pulse while the microphone is live or the text is being finished.
             val transition = rememberInfiniteTransition(label = "pulse")
             val pulse by transition.animateFloat(
                 initialValue = 1f,
                 targetValue = 1.28f,
-                animationSpec = infiniteRepeatable(tween(900), RepeatMode.Reverse),
+                animationSpec = infiniteRepeatable(tween(if (speaking) 500 else 900), RepeatMode.Reverse),
                 label = "pulseScale"
             )
             Box(
                 Modifier
                     .size(76.dp)
                     .scale(pulse)
-                    .alpha(0.18f)
-                    .background(record, CircleShape)
+                    .alpha(0.22f)
+                    .background(color, CircleShape)
             )
         }
         Surface(
             onClick = onClick,
+            enabled = !processing,
             shape = CircleShape,
-            color = if (active) record else MaterialTheme.colorScheme.primary,
-            contentColor = if (active) Color.White else MaterialTheme.colorScheme.onPrimary,
+            color = color,
+            contentColor = if (listening || processing) Color.White else MaterialTheme.colorScheme.onPrimary,
             shadowElevation = 6.dp,
             modifier = Modifier.size(76.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    painterResource(if (active) R.drawable.ic_pause else R.drawable.ic_mic),
-                    contentDescription = stringResource(
-                        if (active) R.string.cd_mic_pause else R.string.cd_mic_start
-                    ),
-                    modifier = Modifier.size(34.dp)
-                )
+                if (processing) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        strokeWidth = 3.dp,
+                        modifier = Modifier.size(34.dp)
+                    )
+                } else {
+                    Icon(
+                        painterResource(if (listening) R.drawable.ic_stop else R.drawable.ic_mic),
+                        contentDescription = stringResource(
+                            if (listening) R.string.cd_mic_finish else R.string.cd_mic_start
+                        ),
+                        modifier = Modifier.size(34.dp)
+                    )
+                }
             }
         }
     }
+}
+
+@Composable
+private fun ProofreadDialog(
+    suggestion: com.ngerchev.tiho.Proofread,
+    onAccept: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val corrected = suggestion.corrected
+    var edited by remember(corrected) { mutableStateOf(corrected ?: "") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.proofread_title)) },
+        text = {
+            if (corrected == null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
+                    Spacer(Modifier.width(16.dp))
+                    Text(stringResource(R.string.proofread_checking))
+                }
+            } else {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text(
+                        text = stringResource(R.string.proofread_original),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = suggestion.original,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = edited,
+                        onValueChange = { edited = it },
+                        label = { Text(stringResource(R.string.proofread_suggested)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            if (corrected != null) {
+                TextButton(onClick = { onAccept(edited) }, enabled = edited.isNotBlank()) {
+                    Text(stringResource(R.string.proofread_accept))
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        }
+    )
 }
 
 /** Decodes a small version of an image, respecting the camera's rotation tag. */

@@ -3,11 +3,11 @@
     <string name="app_name">Tiho</string>
 
     <!-- Chat screen -->
-    <string name="empty_title">Tap the microphone and speak</string>
+    <string name="empty_title">Press the microphone, speak, press it again</string>
     <string name="empty_subtitle">Your words appear as text. Send them to anyone through Viber, WhatsApp or e-mail. No audio is saved.</string>
     <string name="status_ready">Ready</string>
     <string name="status_starting">Starting…</string>
-    <string name="status_listening">Listening</string>
+    <string name="status_listening">Listening · speak, press again to finish</string>
     <string name="status_paused">Paused · tap the microphone to continue</string>
     <string name="engine_on_device">on-device</string>
     <string name="engine_online">speech service</string>
@@ -47,7 +47,7 @@
     <string name="notice_audio">The microphone is busy or unavailable. Try again.</string>
     <string name="notice_busy">The speech service is busy. Try again in a moment.</string>
     <string name="notice_language">This language is not available for recognition on this phone.</string>
-    <string name="notice_silence">Paused after silence to save battery.</string>
+    <string name="notice_silence">Stopped after several minutes of silence. The text was kept.</string>
     <string name="notice_phone_call">Paused because of a phone call.</string>
     <string name="notice_fell_back">On-device recognition is not available for this language. The online speech service is being used.</string>
     <string name="notice_generic">Speech recognition stopped unexpectedly. Tap the microphone to try again.</string>
@@ -101,8 +101,8 @@
     <string name="size_small">Small</string>
     <string name="size_normal">Normal</string>
     <string name="size_large">Large</string>
-    <string name="set_auto_send_title">Each phrase in its own bubble</string>
-    <string name="set_auto_send_text">After every pause, what you said becomes a separate message that can be sent on its own. Turn off to collect the text in the field and edit it first.</string>
+    <string name="set_auto_send_title">Each recording in its own bubble</string>
+    <string name="set_auto_send_text">Press the microphone, speak as long as you need, press it again: the text becomes a separate message. Turn off to have the text put in the field for editing instead.</string>
     <string name="set_punct_keys_title">Punctuation keys</string>
     <string name="set_punct_keys_text">Show the row of quick keys . , ? ! and new line.</string>
     <string name="set_screen_on_title">Keep the screen on while dictating</string>
@@ -177,4 +177,18 @@
     <string name="key_dialog_hint">A Groq key starts with gsk_ and an OpenAI key with sk-</string>
 
     <string name="msg_transcribe_limit">The free limit is used up for now. Try again a little later.</string>
+
+    <!-- Added in 1.6 -->
+    <string name="status_speaking">Hearing you…</string>
+    <string name="status_processing">Finishing the text…</string>
+    <string name="cd_mic_finish">Finish recording</string>
+    <string name="cd_cancel_dictation">Stop without making a message</string>
+    <string name="msg_action_proofread">Check spelling and style</string>
+    <string name="proofread_title">Suggested correction</string>
+    <string name="proofread_checking">Checking spelling, punctuation and style…</string>
+    <string name="proofread_original">Original</string>
+    <string name="proofread_suggested">Corrected (you can still edit it)</string>
+    <string name="proofread_accept">Accept</string>
+    <string name="msg_proofread_failed">The check did not succeed. Check the internet connection and the key.</string>
+    <string name="msg_proofread_same">No corrections needed.</string>
 </resources>

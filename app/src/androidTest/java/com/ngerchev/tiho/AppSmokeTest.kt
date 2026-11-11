@@ -126,6 +126,17 @@ class AppSmokeTest {
     }
 
     @Test
+    fun proofreadingWithoutKeyAsksForOne() {
+        val text = unique("Check me")
+        sendTyped(text)
+        tapBubble(text)
+        rule.onNodeWithText(s(R.string.msg_action_proofread)).performClick()
+        rule.onNodeWithText(s(R.string.key_dialog_title)).assertExists()
+        rule.onNodeWithText(s(R.string.action_cancel)).performClick()
+        rule.onNodeWithContentDescription(s(R.string.cd_menu)).assertExists()
+    }
+
+    @Test
     fun readyPhrasesCanBeAddedAndUsed() {
         val phrase = unique("Phrase")
         rule.onNodeWithContentDescription(s(R.string.cd_templates)).performClick()

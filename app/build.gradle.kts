@@ -26,7 +26,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = buildNumber
-        versionName = "1.5.$buildNumber"
+        versionName = "1.6.$buildNumber"
 
         // Phones are ARM; leaving out the emulator (x86) builds halves the size of the APK.
         // (The automated tests run on an x86 emulator and pass -PallAbis to keep everything.)

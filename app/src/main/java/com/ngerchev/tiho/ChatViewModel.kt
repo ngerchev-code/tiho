@@ -41,6 +41,9 @@ import java.io.File
 
 enum class Screen { CHAT, LANGUAGE, SETTINGS, TEMPLATES, ABOUT }
 
+/** A suggested correction of one message, shown for the person to accept or reject. */
+data class Proofread(val id: Long, val original: String, val corrected: String?)
+
 /** The single ViewModel of the app (MVVM): owns the state, the UI only renders it. */
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -65,6 +68,17 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     /** Set when OpenAI refused the saved key, so the screen can ask for a correct one. */
     var keyRejected by mutableStateOf(false)
+
+    /** Set when proofreading was asked for without a key; holds the message waiting for it. */
+    var keyNeededForProofread by mutableStateOf<Long?>(null)
+
+    /** The correction being prepared or shown; null when there is none. */
+    var proofread by mutableStateOf<Proofread?>(null)
+        private set
+
+    /** True between the second press of the microphone and the finished message (blue). */
+    var processing by mutableStateOf(false)
+        private set
 
     /** True while a recording is being turned into text. */
     var transcribing by mutableStateOf(false)
@@ -94,6 +108,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         checkForUpdate(manual = false)
+        speech.onStopped = { finished -> if (finished) finishRecording() }
     }
 
     // ---- self-update ----
@@ -129,9 +144,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     // ---- dictation ----
 
     fun startDictation() {
+        if (processing) return
         val s = settings.value
+        // The microphone stays on until the second press (or several minutes of silence).
+        speech.silenceLimit = SpeechController.MANUAL_SILENCE_LIMIT
         speech.start(s.languageTag, s.preferOnDevice)
     }
+
+    /** Stops without making a message: what was said stays in the text field. */
+    fun cancelDictation() = speech.halt(DictationState.IDLE, null)
 
     fun pauseDictation() = speech.pause()
 
@@ -153,41 +174,85 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             text
         }
-        val combined = TextFormatter.join(draft.text, phrase)
-        if (!s.autoSend) {
-            setDraftText(combined)
-            return
-        }
-        // Separate bubbles: every sentence becomes its own message right away.
-        val sentences = TextFormatter.splitSentences(combined)
-        if (sentences.isEmpty()) return
-        val files = draftAttachments.toList()
-        draftAttachments.clear()
-        setDraftText("")
-        sentences.forEachIndexed { index, sentence ->
-            improve(messageStore.add(sentence, if (index == 0) files else emptyList()))
-        }
+        // While recording, the words collect in the text field; the message is made at the end.
+        setDraftText(TextFormatter.join(draft.text, phrase))
     }
 
     /**
-     * Optional online steps for a dictated message, both off by default: better punctuation
-     * through the user's own OpenAI key, and translation to the other language. The bubble
-     * appears at once and its text is replaced when the result arrives.
+     * After the second press: the whole recording gets its final punctuation (by AI when a
+     * key is set and AI punctuation is on) and becomes one message in its own bubble.
      */
-    private fun improve(message: Message) {
+    private fun finishRecording() {
+        val text = draft.text.trim()
+        if (text.isEmpty() || processing) return
         val s = settings.value
         val useAi = Updater.ENABLED && s.aiPunctuation && s.aiKey.isNotBlank()
-        val useTranslation = Translator.ENABLED && s.autoTranslate
-        if (!useAi && !useTranslation) return
+        processing = true
         viewModelScope.launch {
-            var text = message.text
-            if (useAi) {
-                val better = withContext(Dispatchers.IO) { AiPunctuation.fix(text, s.aiKey, s.aiModel) }
-                if (better != null) {
-                    text = better
-                    messageStore.updateText(message.id, text)
-                }
+            val finalText = if (useAi) {
+                withContext(Dispatchers.IO) { AiPunctuation.fix(text, s.aiKey, s.aiModel) } ?: text
+            } else {
+                text
             }
+            processing = false
+            if (!s.autoSend) {
+                setDraftText(finalText)
+                return@launch
+            }
+            val files = draftAttachments.toList()
+            draftAttachments.clear()
+            setDraftText("")
+            improve(messageStore.add(finalText, files))
+        }
+    }
+
+    // ---- proofreading ----
+
+    /** Asks the AI service for a corrected version of a message; the person then decides. */
+    fun proofreadMessage(id: Long) {
+        val message = messages.value.firstOrNull { it.id == id } ?: return
+        if (message.text.isBlank()) return
+        val s = settings.value
+        if (s.aiKey.isBlank()) {
+            keyNeededForProofread = id
+            return
+        }
+        proofread = Proofread(id, message.text, null)
+        viewModelScope.launch {
+            val corrected = withContext(Dispatchers.IO) {
+                AiPunctuation.proofread(message.text, s.aiKey, s.aiModel)
+            }
+            if (proofread?.id != id) return@launch
+            if (corrected == null) {
+                proofread = null
+                notify(R.string.msg_proofread_failed)
+            } else if (corrected == message.text) {
+                proofread = null
+                notify(R.string.msg_proofread_same)
+            } else {
+                proofread = Proofread(id, message.text, corrected)
+            }
+        }
+    }
+
+    fun acceptProofread(text: String) {
+        val current = proofread ?: return
+        val clean = text.trim()
+        if (clean.isNotEmpty()) messageStore.updateText(current.id, clean)
+        proofread = null
+    }
+
+    fun dismissProofread() {
+        proofread = null
+    }
+
+    /** Optional, off by default: the dictated message is translated to the other language. */
+    private fun improve(message: Message) {
+        val s = settings.value
+        val useTranslation = Translator.ENABLED && s.autoTranslate
+        if (!useTranslation) return
+        viewModelScope.launch {
+            val text = message.text
             if (useTranslation) {
                 val translated = Translator.translate(text, toEnglish = s.languageTag.startsWith("bg"))
                 if (translated != null) {

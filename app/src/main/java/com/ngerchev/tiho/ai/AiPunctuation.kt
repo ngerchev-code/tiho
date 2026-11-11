@@ -65,8 +65,28 @@ object AiPunctuation {
         }
     }
 
-    /** Blocking. Returns the corrected text, or null on any problem (the caller keeps the original). */
-    fun fix(text: String, apiKey: String, model: String): String? {
+    private const val EDITOR =
+        "You are a careful editor of Bulgarian and English. Correct spelling, grammar, " +
+            "punctuation, style and word choice so the text reads naturally and correctly. " +
+            "Keep the meaning, the language and the tone. Do not translate and do not add new " +
+            "information. Reply with the corrected text only, without comments or quotes."
+
+    /** Blocking. Punctuation only; null on any problem (the caller keeps the original). */
+    fun fix(text: String, apiKey: String, model: String): String? =
+        complete(text, apiKey, model, INSTRUCTIONS, 0.6f, 1.6f)
+
+    /** Blocking. Full proofreading: spelling, grammar, punctuation, style and word choice. */
+    fun proofread(text: String, apiKey: String, model: String): String? =
+        complete(text, apiKey, model, EDITOR, 0.4f, 2.0f)
+
+    private fun complete(
+        text: String,
+        apiKey: String,
+        model: String,
+        instructions: String,
+        minRatio: Float,
+        maxRatio: Float
+    ): String? {
         val groq = Transcriber.isGroqKey(apiKey)
         val chosenModel = if (groq) {
             model.ifBlank { pickGroqModel(apiKey) ?: return null }
@@ -81,7 +101,7 @@ object AiPunctuation {
                 .put(
                     "messages",
                     JSONArray()
-                        .put(JSONObject().put("role", "system").put("content", INSTRUCTIONS))
+                        .put(JSONObject().put("role", "system").put("content", instructions))
                         .put(JSONObject().put("role", "user").put("content", text))
                 )
             val c = open((if (groq) GROQ_BASE else OPENAI_BASE) + "chat/completions", apiKey)
@@ -100,7 +120,7 @@ object AiPunctuation {
                 .getJSONObject("message").getString("content").trim()
             // Guard against an answer that is clearly not "the same text with punctuation".
             val ratio = result.length.toFloat() / text.length.coerceAtLeast(1)
-            if (result.isEmpty() || ratio < 0.6f || ratio > 1.6f) null else result
+            if (result.isEmpty() || ratio < minRatio || ratio > maxRatio) null else result.trim('"', '“', '”', '„')
         } catch (_: Exception) {
             null
         } finally {

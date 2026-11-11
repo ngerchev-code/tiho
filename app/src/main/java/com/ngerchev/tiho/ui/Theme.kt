@@ -129,6 +129,14 @@ fun TihoTheme(
 @Composable
 fun recordColor(): Color = if (LocalIsDark.current) RecordDark else RecordLight
 
+/** Green while the person is speaking. */
+@Composable
+fun speakingColor(): Color = if (LocalIsDark.current) Color(0xFF4ADE80) else Color(0xFF16A34A)
+
+/** Blue while the finished recording is being turned into a message. */
+@Composable
+fun processingColor(): Color = if (LocalIsDark.current) Color(0xFF60A5FA) else Color(0xFF2563EB)
+
 /** Familiar colours for the file-type badges. */
 fun fileKindColor(kind: FileKind): Color = when (kind) {
     FileKind.IMAGE -> Color(0xFF6B7280)

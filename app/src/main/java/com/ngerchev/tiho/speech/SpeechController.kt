@@ -29,7 +29,9 @@ data class SpeechUiState(
     val state: DictationState = DictationState.IDLE,
     val partial: String = "",
     val engine: SpeechEngine? = null,
-    val notice: SpeechNotice? = null
+    val notice: SpeechNotice? = null,
+    /** True while the person is actually speaking (the button turns green). */
+    val speaking: Boolean = false
 )
 
 /**
@@ -68,6 +70,16 @@ class SpeechController(
     private var afterStop = DictationState.PAUSED
     private var lastPartial = ""
     private var silentRounds = 0
+
+    /** How many silent rounds (each a few seconds) before the microphone stops by itself. */
+    var silenceLimit = DEFAULT_SILENCE_LIMIT
+
+    /**
+     * Called once the microphone has stopped and every recognized word has been delivered.
+     * [finished] is true when the person ended the recording (or it ended after long silence),
+     * false when it was interrupted (phone call, app in background, error).
+     */
+    var onStopped: ((finished: Boolean) -> Unit)? = null
     private var retries = 0
 
     private var modeListener: AudioManager.OnModeChangedListener? = null
@@ -124,6 +136,7 @@ class SpeechController(
         commitPartial()
         release()
         _state.value = SpeechUiState(target, notice = notice)
+        onStopped?.invoke(notice == SpeechNotice.SILENCE)
     }
 
     fun showNotice(notice: SpeechNotice?) {
@@ -155,7 +168,8 @@ class SpeechController(
             if (stopping) {
                 afterStop = target
             } else {
-                _state.update { it.copy(state = target, partial = "") }
+                _state.update { it.copy(state = target, partial = "", speaking = false) }
+                onStopped?.invoke(target == DictationState.IDLE)
             }
             return
         }
@@ -181,7 +195,8 @@ class SpeechController(
         stopping = false
         commitPartial()
         release()
-        _state.update { it.copy(state = afterStop, partial = "") }
+        _state.update { it.copy(state = afterStop, partial = "", speaking = false) }
+        onStopped?.invoke(afterStop == DictationState.IDLE)
     }
 
     private fun commitPartial() {
@@ -273,7 +288,7 @@ class SpeechController(
         when {
             stopping -> finishStop()
             !wantListening -> Unit
-            silentRounds >= MAX_SILENT_ROUNDS -> halt(DictationState.PAUSED, SpeechNotice.SILENCE)
+            silentRounds >= silenceLimit -> halt(DictationState.PAUSED, SpeechNotice.SILENCE)
             else -> handler.postDelayed(restartRunnable, RESTART_DELAY_MS)
         }
     }
@@ -364,10 +379,16 @@ class SpeechController(
             _state.update { it.copy(state = DictationState.LISTENING, engine = engine) }
         }
 
-        override fun onBeginningOfSpeech() {}
+        override fun onBeginningOfSpeech() {
+            if (live) _state.update { it.copy(speaking = true) }
+        }
+
         override fun onRmsChanged(rmsdB: Float) {}
         override fun onBufferReceived(buffer: ByteArray?) {}
-        override fun onEndOfSpeech() {}
+
+        override fun onEndOfSpeech() {
+            if (live) _state.update { it.copy(speaking = false) }
+        }
         override fun onEvent(eventType: Int, params: Bundle?) {}
 
         override fun onPartialResults(partialResults: Bundle?) {
@@ -390,18 +411,22 @@ class SpeechController(
                 silentRounds++
             }
             retries = 0
-            _state.update { it.copy(partial = "") }
+            _state.update { it.copy(partial = "", speaking = false) }
             afterRound()
         }
 
         override fun onError(error: Int) {
             if (!live) return
+            _state.update { it.copy(speaking = false) }
             handleError(error)
         }
     }
 
     companion object {
-        private const val MAX_SILENT_ROUNDS = 3
+        const val DEFAULT_SILENCE_LIMIT = 3
+
+        /** Waits for the second press: only after several minutes of silence does it stop. */
+        const val MANUAL_SILENCE_LIMIT = 40
         private const val MAX_RETRIES = 3
         private const val RESTART_DELAY_MS = 150L
         private const val RETRY_DELAY_MS = 400L

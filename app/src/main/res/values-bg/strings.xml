@@ -2,11 +2,11 @@
 <resources>
     <string name="app_name">Тихо</string>
 
-    <string name="empty_title">Натиснете микрофона и говорете</string>
+    <string name="empty_title">Натиснете микрофона, говорете и натиснете пак</string>
     <string name="empty_subtitle">Думите ви се появяват като текст. Изпратете ги на когото искате през Viber, WhatsApp или имейл. Не се записва звук.</string>
     <string name="status_ready">Готово</string>
     <string name="status_starting">Стартиране…</string>
-    <string name="status_listening">Слушам</string>
+    <string name="status_listening">Слушам · говорете, натиснете пак за край</string>
     <string name="status_paused">Пауза · натиснете микрофона, за да продължите</string>
     <string name="engine_on_device">на устройството</string>
     <string name="engine_online">услуга за реч</string>
@@ -45,7 +45,7 @@
     <string name="notice_audio">Микрофонът е зает или недостъпен. Опитайте отново.</string>
     <string name="notice_busy">Услугата за реч е заета. Опитайте след малко.</string>
     <string name="notice_language">Този език не е наличен за разпознаване на този телефон.</string>
-    <string name="notice_silence">Пауза след тишина, за да се пести батерия.</string>
+    <string name="notice_silence">Спрях след няколко минути тишина. Текстът е запазен.</string>
     <string name="notice_phone_call">Пауза заради телефонно обаждане.</string>
     <string name="notice_fell_back">Разпознаването на устройството не е налично за този език. Използва се онлайн услугата за реч.</string>
     <string name="notice_generic">Разпознаването спря неочаквано. Натиснете микрофона, за да опитате отново.</string>
@@ -96,8 +96,8 @@
     <string name="size_small">Малък</string>
     <string name="size_normal">Нормален</string>
     <string name="size_large">Голям</string>
-    <string name="set_auto_send_title">Всяка фраза в отделно облаче</string>
-    <string name="set_auto_send_text">След всяка пауза казаното става отделно съобщение, което се изпраща самостоятелно. Изключете, ако искате текстът да се събира в полето и да го редактирате преди това.</string>
+    <string name="set_auto_send_title">Всеки запис в отделно облаче</string>
+    <string name="set_auto_send_text">Натискате микрофона, говорите колкото искате, натискате пак: текстът става отделно съобщение. Изключете, ако искате текстът да отива в полето за редакция.</string>
     <string name="set_punct_keys_title">Бутони за пунктуация</string>
     <string name="set_punct_keys_text">Показва реда с бързи бутони . , ? ! и нов ред.</string>
     <string name="set_screen_on_title">Екранът да не гасне при диктовка</string>
@@ -172,4 +172,18 @@
     <string name="key_dialog_hint">Ключът от Groq започва с gsk_, а от OpenAI с sk-</string>
 
     <string name="msg_transcribe_limit">Безплатният лимит е изчерпан за момента. Опитайте малко по-късно.</string>
+
+    <!-- Added in 1.6 -->
+    <string name="status_speaking">Чувам ви…</string>
+    <string name="status_processing">Довършвам текста…</string>
+    <string name="cd_mic_finish">Край на записа</string>
+    <string name="cd_cancel_dictation">Спри, без да правиш съобщение</string>
+    <string name="msg_action_proofread">Провери правопис и стил</string>
+    <string name="proofread_title">Предложена редакция</string>
+    <string name="proofread_checking">Проверявам правопис, пунктуация и стил…</string>
+    <string name="proofread_original">Оригинал</string>
+    <string name="proofread_suggested">Поправен текст (може да го редактирате)</string>
+    <string name="proofread_accept">Приеми</string>
+    <string name="msg_proofread_failed">Проверката не успя. Проверете интернет връзката и ключа.</string>
+    <string name="msg_proofread_same">Не са нужни поправки.</string>
 </resources>
